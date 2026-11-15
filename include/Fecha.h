@@ -1,24 +1,37 @@
 #ifndef FECHA_H
 #define FECHA_H
 
-#include <chrono>
-#include <optional>
-#include <string>
-#include <string_view>
+class Fecha {
+private:
+    int dia;
+    int mes;
+    int anio;
 
-namespace fecha {
+public:
+    // PRECONDICION:
+    // 1- Los valores deben formar una fecha valida (anio entre 1 y 9999).
+    Fecha(int dia, int mes, int anio);
 
-using Fecha = std::chrono::year_month_day;
+    // PRECONDICION: Ninguna.
+    int getDia() const;
+    // PRECONDICION: Ninguna.
+    int getMes() const;
+    // PRECONDICION: Ninguna.
+    int getAnio() const;
 
-// Interpreta una fecha ISO estricta (AAAA-MM-DD). Devuelve nullopt si no es válida.
-std::optional<Fecha> parsearISO(std::string_view texto);
+    // Comprueba los dias de cada mes y los anios bisiestos.
+    // PRECONDICION: Ninguna.
+    static bool esValida(int dia, int mes, int anio);
 
-// Comprueba que el día exista en el calendario gregoriano y que el año sea positivo.
-bool esValida(const Fecha& valor) noexcept;
+    // PRECONDICION:
+    // 1- Ambas fechas deben ser validas.
+    bool esMenor(const Fecha& otra) const;
+    // PRECONDICION:
+    // 1- Ambas fechas deben ser validas.
+    bool esMayor(const Fecha& otra) const;
+    // PRECONDICION:
+    // 1- Ambas fechas deben ser validas.
+    bool esIgual(const Fecha& otra) const;
+};
 
-// Devuelve la fecha en formato AAAA-MM-DD o nullopt si el valor no es válido.
-std::optional<std::string> aISO(const Fecha& valor);
-
-} // namespace fecha
-
-#endif // FECHA_H
+#endif

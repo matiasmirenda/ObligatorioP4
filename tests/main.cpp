@@ -1,66 +1,38 @@
 #include "Fecha.h"
-
 #include <iostream>
-#include <string_view>
-
-namespace {
 
 int fallos = 0;
-
-void verificar(bool condicion, std::string_view descripcion) {
+void verificar(bool condicion, const char* descripcion) {
     if (!condicion) {
         std::cerr << "FALLO: " << descripcion << '\n';
         ++fallos;
     }
 }
 
-void probarParseoISO() {
-    const auto fecha = fecha::parsearISO("2024-02-29");
-    verificar(fecha.has_value(), "acepta un día bisiesto válido");
-    verificar(fecha && int(fecha->year()) == 2024 && unsigned(fecha->month()) == 2 &&
-                  unsigned(fecha->day()) == 29,
-              "interpreta año, mes y día");
-}
-
-void probarFechasInvalidas() {
-    verificar(!fecha::parsearISO("2023-02-29"), "rechaza un día bisiesto inexistente");
-    verificar(!fecha::parsearISO("2024-13-01"), "rechaza un mes fuera de rango");
-    verificar(!fecha::parsearISO("2024-04-31"), "rechaza un día fuera del mes");
-    verificar(!fecha::parsearISO("0000-01-01"), "rechaza el año cero");
-}
-
-void probarFormatoEstricto() {
-    verificar(!fecha::parsearISO(""), "rechaza texto vacío");
-    verificar(!fecha::parsearISO("2024/02/29"), "rechaza separadores distintos");
-    verificar(!fecha::parsearISO("2024-2-09"), "rechaza componentes sin ancho fijo");
-    verificar(!fecha::parsearISO("abcd-02-09"), "rechaza componentes no numéricos");
-}
-
-void probarFormatoISO() {
-    const auto valor = fecha::parsearISO("2001-09-08");
-    verificar(valor.has_value(), "prepara fecha para formato");
-    if (valor) {
-        const auto texto = fecha::aISO(*valor);
-        verificar(texto && *texto == "2001-09-08", "formatea con ceros a la izquierda");
-    }
-
-    const fecha::Fecha invalida{std::chrono::year{2024}, std::chrono::month{2},
-                                std::chrono::day{30}};
-    verificar(!fecha::aISO(invalida), "no formatea una fecha inválida");
-}
-
-} // namespace
-
 int main() {
-    probarParseoISO();
-    probarFechasInvalidas();
-    probarFormatoEstricto();
-    probarFormatoISO();
-
-    if (fallos != 0) {
-        std::cerr << fallos << " comprobación(es) fallaron\n";
-        return 1;
-    }
+    Fecha fecha(29, 2, 2024);
+    verificar(fecha.getDia() == 29 && fecha.getMes() == 2 && fecha.getAnio() == 2024,
+              "consulta de componentes");
+    verificar(Fecha::esValida(29, 2, 2024), "bisiesto divisible por cuatro");
+    verificar(Fecha::esValida(29, 2, 2000), "bisiesto divisible por cuatrocientos");
+    verificar(!Fecha::esValida(29, 2, 1900), "siglo no bisiesto");
+    verificar(!Fecha::esValida(29, 2, 2023), "febrero no bisiesto");
+    verificar(Fecha::esValida(30, 4, 2024), "mes de treinta dias");
+    verificar(!Fecha::esValida(31, 4, 2024), "dia fuera del mes");
+    verificar(Fecha::esValida(31, 12, 9999), "limite superior");
+    verificar(!Fecha::esValida(1, 1, 0), "anio cero");
+    verificar(!Fecha::esValida(1, 1, 10000), "anio fuera de rango");
+    verificar(!Fecha::esValida(1, 0, 2024), "mes cero");
+    verificar(!Fecha::esValida(1, 13, 2024), "mes fuera de rango");
+    verificar(!Fecha::esValida(0, 1, 2024), "dia cero");
+    verificar(Fecha(31, 12, 2023).esMenor(fecha), "compara anios");
+    verificar(Fecha(31, 1, 2024).esMenor(fecha), "compara meses");
+    verificar(Fecha(28, 2, 2024).esMenor(fecha), "compara dias");
+    verificar(fecha.esMayor(Fecha(28, 2, 2024)), "fecha mayor");
+    verificar(!fecha.esMayor(fecha) && !fecha.esMenor(fecha), "igualdad no es mayor ni menor");
+    verificar(fecha.esIgual(Fecha(29, 2, 2024)), "fechas iguales");
+    verificar(!fecha.esIgual(Fecha(28, 2, 2024)), "fechas diferentes");
+    if (fallos != 0) return 1;
     std::cout << "Todas las comprobaciones pasaron\n";
     return 0;
 }

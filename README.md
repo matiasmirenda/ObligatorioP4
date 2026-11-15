@@ -1,35 +1,17 @@
 # Obligatorio P4 UDE
 
-Scaffolding inicial para el obligatorio en C++20. Los archivos de las entidades
-del dominio están reservados y siguen vacíos hasta que se definan sus
-responsabilidades.
+Los encabezados estan en include/ y las implementaciones en src/.
+Las entidades del dominio siguen vacias. Fecha contiene dia, mes y anio
+como enteros, validacion y comparaciones de menor, mayor e igual.
+Antes de construir una Fecha se debe comprobar Fecha::esValida(dia, mes, anio).
 
-## Estructura
-
-- `include/`: declaraciones (`.h`).
-- `src/`: implementaciones (`.cpp`).
-- `tests/`: ejecutable de comprobaciones con su propio `main`.
-- `.github/workflows/ci.yml`: compilación, pruebas y control de cobertura en PR.
-
-## Compilar y ejecutar las pruebas
+Para compilar y ejecutar las pruebas desde la terminal de Visual Studio Code:
 
 ```sh
-cmake -S . -B build
-cmake --build build
-ctest --test-dir build --output-on-failure
+mkdir -p build
+g++ -std=c++11 -Wall -Wextra -pedantic -Iinclude src/Fecha.cpp tests/main.cpp -o build/p4_tests
+./build/p4_tests
 ```
 
-El módulo `fecha` usa `std::chrono::year_month_day` y ofrece parseo y formato
-ISO (`AAAA-MM-DD`). Para medir cobertura local con GCC:
-
-```sh
-python -m pip install gcovr
-cmake -S . -B build-coverage -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE=ON
-cmake --build build-coverage
-ctest --test-dir build-coverage --output-on-failure
-gcovr --root . --filter 'src/' --fail-under-line 90 build-coverage
-```
-
-La CI exige al menos 90% de cobertura de líneas sobre los `.cpp` de `src/`.
-Los módulos todavía vacíos no aportan líneas ejecutables; las implementaciones
-nuevas quedan incluidas automáticamente en el control.
+GitHub Actions compila, ejecuta las pruebas y exige un minimo de 90% de
+cobertura de lineas en src/.

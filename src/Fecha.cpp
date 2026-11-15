@@ -1,68 +1,39 @@
 #include "Fecha.h"
 
-#include <array>
-#include <charconv>
-#include <system_error>
+Fecha::Fecha(int dia, int mes, int anio) : dia(dia), mes(mes), anio(anio) {}
 
-namespace fecha {
-namespace {
+int Fecha::getDia() const { return dia; }
+int Fecha::getMes() const { return mes; }
+int Fecha::getAnio() const { return anio; }
 
-bool leerNumero(std::string_view texto, int& valor) {
-    const auto resultado = std::from_chars(texto.data(), texto.data() + texto.size(), valor);
-    return resultado.ec == std::errc{} && resultado.ptr == texto.data() + texto.size();
-}
-
-void escribirDosDigitos(unsigned valor, char* destino) {
-    destino[0] = static_cast<char>('0' + (valor / 10U));
-    destino[1] = static_cast<char>('0' + (valor % 10U));
-}
-
-} // namespace
-
-bool esValida(const Fecha& valor) noexcept {
-    return valor.ok() && int(valor.year()) >= 1;
-}
-
-std::optional<Fecha> parsearISO(std::string_view texto) {
-    if (texto.size() != 10 || texto[4] != '-' || texto[7] != '-') {
-        return std::nullopt;
+bool Fecha::esValida(int dia, int mes, int anio) {
+    if (anio < 1 || anio > 9999 || mes < 1 || mes > 12 || dia < 1) {
+        return false;
     }
-
-    int anio = 0;
-    int mes = 0;
-    int dia = 0;
-    if (!leerNumero(texto.substr(0, 4), anio) ||
-        !leerNumero(texto.substr(5, 2), mes) ||
-        !leerNumero(texto.substr(8, 2), dia)) {
-        return std::nullopt;
+    int diasDelMes = 31;
+    if (mes == 4 || mes == 6 || mes == 9 || mes == 11) {
+        diasDelMes = 30;
+    } else if (mes == 2) {
+        bool bisiesto = anio % 400 == 0 || (anio % 4 == 0 && anio % 100 != 0);
+        diasDelMes = bisiesto ? 29 : 28;
     }
-
-    const Fecha resultado{std::chrono::year{anio}, std::chrono::month{static_cast<unsigned>(mes)},
-                          std::chrono::day{static_cast<unsigned>(dia)}};
-    if (!esValida(resultado)) {
-        return std::nullopt;
-    }
-    return resultado;
+    return dia <= diasDelMes;
 }
 
-std::optional<std::string> aISO(const Fecha& valor) {
-    if (!esValida(valor)) {
-        return std::nullopt;
+bool Fecha::esMenor(const Fecha& otra) const {
+    if (anio != otra.anio) {
+        return anio < otra.anio;
     }
-
-    const unsigned anio = static_cast<unsigned>(int(valor.year()));
-    const unsigned mes = static_cast<unsigned>(valor.month());
-    const unsigned dia = static_cast<unsigned>(valor.day());
-    std::array<char, 10> texto{};
-    texto[0] = static_cast<char>('0' + (anio / 1000U) % 10U);
-    texto[1] = static_cast<char>('0' + (anio / 100U) % 10U);
-    texto[2] = static_cast<char>('0' + (anio / 10U) % 10U);
-    texto[3] = static_cast<char>('0' + anio % 10U);
-    texto[4] = '-';
-    escribirDosDigitos(mes, texto.data() + 5);
-    texto[7] = '-';
-    escribirDosDigitos(dia, texto.data() + 8);
-    return std::string(texto.data(), texto.size());
+    if (mes != otra.mes) {
+        return mes < otra.mes;
+    }
+    return dia < otra.dia;
 }
 
-} // namespace fecha
+bool Fecha::esMayor(const Fecha& otra) const {
+    return otra.esMenor(*this);
+}
+
+bool Fecha::esIgual(const Fecha& otra) const {
+    return dia == otra.dia && mes == otra.mes && anio == otra.anio;
+}
