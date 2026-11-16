@@ -104,3 +104,55 @@ los nodos, cubetas y recorridos internos pertenecen a las estructuras.
 
 Los archivos nuevos de estructuras e iteradores se reservan vacios. La propuesta
 no constituye aun la especificacion UML completa exigida para la entrega.
+
+## Plan por fases para tres integrantes (sin fechas)
+
+Se identifican como A, B y C hasta asignar nombres. Cada entrega incluye sus
+pruebas y se integra mediante PR a develop. Se comienza una rama por entregable
+a partir de develop actualizado. No se trabaja directamente en develop.
+
+| Fase | Integrante A | Integrante B | Integrante C | Condicion para cerrar la fase |
+| --- | --- | --- | --- | --- |
+| 1. Acuerdos y base | Fecha: validacion y comparaciones | Autor: datos y consultas | Libro: datos comunes y contrato de precio | Acordar firmas, tipos de claves, resultados de error y propiedad de punteros; probar las tres clases |
+| 2. Trabajo paralelo | Novela, Texto y Escolar: precios, fecha y asociacion con Autor | ColeccionAutores, ABBAutores y sus iteradores | ColeccionLibros, HashLibros y sus iteradores | Compilar las interfaces acordadas; probar descuentos, orden, duplicados, colisiones y recorridos |
+| 3. Operaciones de logica | Consultas de libros: prefijo y detalle (4 y 5) | Registro de autores y listado ordenado (1 y 6) | Registro de libros y asociacion de autor (2 y 3) | Probar operaciones vacias, claves inexistentes y resultados correctos |
+| 4. Ventas y consultas agregadas | Ventas y precio final (7) | Recaudacion por editorial y libro mas vendido (8 y 10) | Unidades vendidas por precio y tipo (9) | Probar ventas sucesivas, tipos de libro, ausencia de editorial y empates |
+| 5. Integracion y entrega | Main, entrada y mensajes | UML y justificacion de estructuras y memoria | Proyecto Code::Blocks y revision del paquete | Los diez requerimientos funcionan, CI pasa con cobertura minima 90%, documentos y codigo coinciden |
+
+### Como evitar bloqueos y conflictos
+
+- Antes de la fase 2, cerrar juntos las interfaces de Libro, Autor, colecciones
+  e iteradores. Los nombres y tipos deben coincidir en las tres ramas.
+- Cada integrante implementa contra esos contratos; los cambios de interfaz se
+  acuerdan y se integran primero mediante un PR pequeno.
+- En fases 3 y 4, escribir y probar cada operacion en el modulo que posee sus
+  datos. Un responsable de integracion por fase conecta las llamadas en Fachada:
+  A en fase 3 y C en fase 4. Asi no se editan simultaneamente sus mismos metodos.
+- Los metodos de Fachada se acuerdan antes de comenzar esas fases. La logica no
+  debe depender del menu: el main se conecta al final.
+- Agregar pruebas en archivos separados por modulo y mantener un unico main de
+  pruebas que las invoque. Actualizar el comando de CI al incorporar archivos
+  con implementacion y nuevas pruebas; los archivos reservados vacios no bastan.
+- Cada PR debe incluir alcance, precondiciones y pruebas. Otra persona lo revisa;
+  la regla obligatoria de aprobacion se activara despues del primer merge acordado.
+- Una fase no exige que todos terminen al mismo tiempo: se puede comenzar una
+  tarea cuando sus dependencias esten integradas y probadas.
+
+### Criterios de aceptacion por funcionalidad
+
+| Requerimiento | Entregable comprobable |
+| --- | --- |
+| 1 | Registra autor; rechaza cedula repetida sin modificar la coleccion |
+| 2 | Registra cada tipo de libro con cero ventas; rechaza ISBN repetido |
+| 3 | Asocia y reemplaza autor; informa claves inexistentes y verifica que sea novela |
+| 4 | Filtra por prefijo exacto del titulo y produce datos basicos; detecta resultado vacio |
+| 5 | Consulta datos completos por ISBN e incluye autor cuando corresponda |
+| 6 | Recorre autores por cedula ascendente; detecta coleccion vacia |
+| 7 | Incrementa una venta y devuelve el precio con sus descuentos; rechaza ISBN inexistente |
+| 8 | Suma unidades vendidas por precio de venta para la editorial consultada |
+| 9 | Suma unidades, no titulos, con precio base estrictamente mayor; separa los tres tipos |
+| 10 | Obtiene un libro con ventas maximas de la editorial, incluye detalle y autor; admite cualquier empate |
+
+La eleccion inicial para autores es ABB: la letra no exige operaciones O(log n).
+AVL queda como mejora posible, fuera del alcance inicial, si se decide garantizar
+ese costo aun con cedulas insertadas en orden.
