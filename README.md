@@ -15,3 +15,92 @@ g++ -std=c++11 -Wall -Wextra -pedantic -Iinclude src/Fecha.cpp tests/main.cpp -o
 
 GitHub Actions compila, ejecuta las pruebas y exige un minimo de 90% de
 cobertura de lineas en src/.
+
+## Propuesta de TAD y estructuras de datos
+
+Esta es una propuesta de diseño para discutir antes de implementar. La letra
+pide justificar las colecciones; no impone hash, ABB ni AVL.
+
+Un TAD define las operaciones y su significado. La estructura elegida define
+como se guardan los datos para resolver esas operaciones. En objetos, una clase
+abstracta puede expresar el contrato y una clase concreta implementar la estructura.
+No es necesario que toda clase del sistema sea abstracta.
+
+| TAD / contrato | Implementacion propuesta | Motivo y requerimientos |
+| --- | --- | --- |
+| ColeccionLibros: diccionario por ISBN | HashLibros: tabla hash con encadenamiento | Hay aproximadamente 500 titulos. Registrar sin duplicados y consultar por ISBN son operaciones frecuentes (2, 3, 5 y 7). Busqueda e insercion esperadas O(1) con buena dispersion y carga controlada; peor caso O(n). |
+| ColeccionAutores: diccionario por cedula | ABBAutores: arbol binario de busqueda | No hay cota para autores. Permite buscar por cedula (1 y 3) y listar ordenados mediante recorrido en orden (6), en O(n) para el listado. Buscar e insertar cuestan O(h), y pueden llegar a O(n) si el arbol se degenera. |
+| IteradorLibros: recorrido de libros | IteradorHashLibros | Recorre cubetas y sus cadenas para los requerimientos 4, 8, 9 y 10, sin exponer nodos a la Fachada. |
+| IteradorAutores: recorrido ordenado de autores | IteradorABBAutores | Recorre el ABB en orden para el requerimiento 6, sin exponer nodos a la Fachada. |
+
+La cantidad aproximada de libros permite elegir una cantidad inicial de cubetas;
+no significa que 500 sea un limite obligatorio. Las colisiones se resolveran con
+cadenas de nodos enlazados, que tambien permiten superar esa estimacion. Los
+recorridos completos del hash cuestan O(n + cantidad de cubetas).
+
+### ABB, AVL y listas
+
+Se propone ABB como punto inicial por su menor complejidad de implementacion.
+AVL es una alternativa si se requiere garantizar O(log n) para buscar e insertar
+autores, incluso con cedulas ingresadas en orden; agrega balanceos y rotaciones.
+La ausencia de cota por si sola no obliga a usar AVL ni impide usar hash.
+
+Una lista enlazada permite insercion sencilla y recorrido secuencial, pero buscar
+un ISBN o una cedula cuesta O(n). Por eso se usaran cadenas enlazadas para las
+colisiones del hash, sin agregar por ahora una segunda lista con todos los libros.
+Una lista circular no aporta una ventaja para los recorridos finitos pedidos.
+La sigla LPPF debe confirmarse con la nomenclatura del curso antes de atribuirle
+una estructura y compararla en la documentacion definitiva.
+
+No se agregan indices por editorial, precio ni titulo: con unos 500 libros alcanza
+un recorrido completo para los requerimientos 4, 8, 9 y 10. Asi se evita mantener
+indices adicionales. Si aumentara mucho el volumen, esta decision se revisaria.
+
+### Contratos propuestos para las colecciones
+
+- ColeccionLibros: estaVacia, existe(isbn), buscar(isbn), insertar(libro), crearIterador.
+- ColeccionAutores: estaVacia, existe(cedula), buscar(cedula), insertar(autor), crearIterador.
+- Iteradores: hayActual, actual, avanzar. El recorrido comienza en el primer elemento.
+- buscar: PRECONDICION: la clave existe.
+- insertar: PRECONDICION: el puntero es valido y la clave no existe.
+- actual y avanzar: PRECONDICION: hayActual devuelve verdadero.
+
+Los chequeos de existencia los realiza la logica antes de llamar operaciones con
+esas precondiciones. Las interfaces abstractas tendran destructor virtual.
+Cada iterador se liberara al terminar su uso y no sera propietario de los objetos
+que recorre. La coleccion no se modificara mientras se use su iterador.
+
+### Objetos, punteros y memoria
+
+- Fecha se guarda por valor dentro de Texto: es un dato pequeno con tres enteros.
+- La coleccion de libros guarda Libro* para conservar el polimorfismo de Novela,
+  Texto y Escolar. Libro necesitara destructor virtual.
+- La coleccion de autores guarda Autor* y es propietaria de esos objetos.
+- Novela guarda Autor* como referencia al autor registrado, inicialmente nula;
+  no copia al autor ni lo elimina. Reasignar autor solo cambia esa referencia.
+- Cada coleccion elimina una sola vez sus objetos y sus nodos al finalizar.
+  Primero se destruyen libros y despues autores. Se evitara copiar colecciones
+  propietarias para no duplicar la liberacion de memoria.
+
+### Fecha y capas
+
+Fecha::esMenor(Fecha(1, 1, 2026)) permite aplicar el descuento de los textos
+publicados antes del corte exigido. No se pide un listado por fecha en esta version.
+Las comparaciones mayor e igual quedan disponibles como operaciones del tipo.
+
+Fachada coordina las operaciones y delega en las colecciones y entidades.
+La entrada por teclado y los mensajes se resuelven en la capa de presentacion;
+los nodos, cubetas y recorridos internos pertenecen a las estructuras.
+
+### Orden incremental de implementacion
+
+1. Fecha y sus pruebas.
+2. Autor, Libro y las subclases Novela, Texto y Escolar, con sus pruebas.
+3. Contratos de colecciones e iteradores.
+4. HashLibros e IteradorHashLibros, probando colisiones y recorridos vacios.
+5. ABBAutores e IteradorABBAutores, probando orden y busqueda.
+6. Fachada y los diez requerimientos, con pruebas de integracion.
+7. Programa principal y configuracion de entrega para Code::Blocks.
+
+Los archivos nuevos de estructuras e iteradores se reservan vacios. La propuesta
+no constituye aun la especificacion UML completa exigida para la entrega.
