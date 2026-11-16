@@ -1,11 +1,346 @@
-# Obligatorio P4 UDE
+# Obligatorio P4 · Librería
 
-Los encabezados estan en include/ y las implementaciones en src/.
-Las entidades del dominio siguen vacias. Fecha contiene dia, mes y anio
-como enteros, validacion y comparaciones de menor, mayor e igual.
-Antes de construir una Fecha se debe comprobar Fecha::esValida(dia, mes, anio).
+Prototipo en C++ para gestionar libros de autores nacionales, autores de novelas
+y ventas. Este README reúne el diseño propuesto y el plan de trabajo del equipo.
 
-Para compilar y ejecutar las pruebas desde la terminal de Visual Studio Code:
+> **Estado:** `Fecha` está implementada y tiene pruebas. Las demás clases tienen
+> archivos reservados; los diagramas describen el diseño objetivo, todavía pendiente
+> de implementación. No representan funcionalidades terminadas.
+
+## Guía del documento
+
+- [Análisis: qué representa el sistema](#análisis-qué-representa-el-sistema)
+- [Diseño: cómo se organiza el código](#diseño-cómo-se-organiza-el-código)
+- [Colecciones y estructuras](#colecciones-y-estructuras)
+- [Flujo de una venta](#flujo-de-una-venta)
+- [Memoria y precondiciones](#memoria-y-precondiciones)
+- [Compilación y pruebas](#compilación-y-pruebas)
+- [Plan por fases](#plan-por-fases-para-tres-integrantes-sin-fechas)
+
+## Análisis: qué representa el sistema
+
+El diagrama de clases conceptual representa las entidades y sus relaciones.
+En esta etapa no aparecen hash, ABB, punteros ni la Fachada. `Libro` es abstracta:
+los libros del sistema son novelas o textos; un escolar es un tipo de texto.
+
+```mermaid
+classDiagram
+    direction TB
+    class Libro {
+        <<abstract>>
+        isbn
+        titulo
+        editorial
+        precioBase
+        unidadesVendidas
+    }
+    class Novela {
+        genero
+    }
+    class Texto {
+        materia
+        fechaPublicado
+    }
+    class Escolar {
+        anioEscuela
+    }
+    class Autor {
+        cedula
+        nombre
+        apellido
+    }
+    Libro <|-- Novela
+    Libro <|-- Texto
+    Texto <|-- Escolar
+    Novela "0..*" --> "0..1" Autor : escrita por
+```
+
+Un autor puede estar registrado sin novelas. Una novela puede no tener autor
+asociado o tener uno; reemplazar esa asociación no elimina al autor anterior.
+No se gestionan clientes, empleados, stock ni respaldo en disco.
+
+## Diseño: cómo se organiza el código
+
+El diagrama de clases de implementación propuesto incorpora tipos, operaciones,
+colecciones y la Fachada. Se divide en dos vistas para facilitar su lectura.
+Las firmas que aún no existen en código son propuestas para acordar entre los tres.
+`ISBN` se representará con `long long` y la cédula con `long`; los textos del dominio
+usarán `std::string`. `Fecha` contiene únicamente tres enteros.
+
+### Entidades y polimorfismo
+
+```mermaid
+classDiagram
+    direction TB
+    class Libro {
+        <<abstract>>
+        -isbn: long long
+        -titulo: string
+        -editorial: string
+        -precioBase: double
+        -unidadesVendidas: int
+        +Libro(long long, string, string, double)
+        +getIsbn(): long long
+        +getTitulo(): string
+        +getEditorial(): string
+        +getPrecioBase(): double
+        +getUnidadesVendidas(): int
+        +registrarVenta(): void
+        +calcularPrecioVenta(): double*
+        +getTipo()*
+        +~Libro()
+    }
+    class Novela {
+        -genero: string
+        -autor: Autor*
+        +asignarAutor(Autor*): void
+        +getAutor(): Autor*
+        +calcularPrecioVenta(): double
+        +getTipo()
+    }
+    class Texto {
+        -materia: string
+        -fechaPublicado: Fecha
+        +getFechaPublicado(): Fecha
+        +calcularPrecioVenta(): double
+        +getTipo()
+    }
+    class Escolar {
+        -anioEscuela: int
+        +calcularPrecioVenta(): double
+        +getTipo()
+    }
+    class Autor {
+        -cedula: long
+        -nombre: string
+        -apellido: string
+        +getCedula(): long
+        +getNombre(): string
+        +getApellido(): string
+    }
+    class Fecha {
+        -dia: int
+        -mes: int
+        -anio: int
+        +Fecha(int, int, int)
+        +getDia(): int
+        +getMes(): int
+        +getAnio(): int
+        +esValida(int, int, int): bool$
+        +esMenor(Fecha): bool
+        +esMayor(Fecha): bool
+        +esIgual(Fecha): bool
+    }
+    Libro <|-- Novela
+    Libro <|-- Texto
+    Texto <|-- Escolar
+    Novela "0..*" --> "0..1" Autor : referencia sin propiedad
+    Texto "1" *-- "1" Fecha : por valor
+```
+
+Los métodos abstractos se representan en cursiva y los estáticos subrayados.
+Son conceptos del teórico; los símbolos usados para generar ese formato pertenecen
+al código fuente de Mermaid, no a la notación que se lee en el diagrama.
+`Libro` tendrá destructor virtual, para liberar correctamente objetos derivados
+mediante un puntero a la clase base. Los atributos privados se indican con `-`
+y los métodos públicos, incluidos constructores y destructores, con `+`.
+Los parámetros se muestran solo con sus tipos. Los métodos con retorno se
+escriben como `+metodo(tipos): tipoRetorno`; constructores y destructores no
+llevan tipo de retorno. En la implementación C++ sí se nombran los parámetros.
+El destructor de Libro es público y virtual; los destructores de las colecciones
+son públicos. El signo de visibilidad no indica si un método es virtual.
+
+
+El tipo del resultado de `getTipo()` queda pendiente de acordar con el equipo;
+no se incorpora una enumeración como decisión cerrada. En esta vista se muestra
+solo el nombre de esa operación. También falta completar los constructores y las
+consultas de atributos propios antes de considerar terminado el diseño UML.
+
+| Tipo | Regla de precio de venta |
+| --- | --- |
+| Novela | Precio base; si el género es infantil, multiplicar por 0,80. |
+| Texto | Si fue publicado antes del 01/01/2026, multiplicar el precio base por 0,75. En otro caso, usar el precio base. |
+| Escolar | Aplicar el cálculo de Texto; para 1.º a 3.º, multiplicar además por 0,90. |
+
+### Colecciones y acceso a la lógica
+
+```mermaid
+classDiagram
+    direction TB
+    class Presentacion {
+        entrada y salida por consola
+    }
+    class Fachada {
+        -autores: ColeccionAutores
+        -libros: ColeccionLibros
+        +registrarAutor()
+        +registrarLibro()
+        +asociarAutor()
+        +consultarPorPrefijo()
+        +consultarLibro()
+        +consultarAutoresOrdenados()
+        +registrarVenta()
+        +calcularRecaudacion()
+        +contarVentasPorTipo()
+        +consultarMasVendido()
+    }
+    class ColeccionLibros {
+        -cubetas: NodoLibro**
+        -cantidadCubetas: int
+        +estaVacia(): bool
+        +existe(long long): bool
+        +buscar(long long): Libro*
+        +insertar(Libro*): void
+        +crearIterador(): IteradorLibros*
+        +~ColeccionLibros()
+    }
+    class ColeccionAutores {
+        -raiz: NodoAutor*
+        +estaVacia(): bool
+        +existe(long): bool
+        +buscar(long): Autor*
+        +insertar(Autor*): void
+        +crearIterador(): IteradorAutores*
+        +~ColeccionAutores()
+    }
+    class IteradorLibros {
+        +hayActual(): bool
+        +actual(): Libro*
+        +avanzar(): void
+    }
+    class IteradorAutores {
+        +hayActual(): bool
+        +actual(): Autor*
+        +avanzar(): void
+    }
+    Presentacion ..> Fachada : unico acceso a la logica
+    Fachada "1" *-- "1" ColeccionLibros
+    Fachada "1" *-- "1" ColeccionAutores
+    ColeccionLibros "1" *-- "0..*" Libro : propietaria
+    ColeccionAutores "1" *-- "0..*" Autor : propietaria
+    ColeccionLibros ..> IteradorLibros : crea recorrido hash
+    ColeccionAutores ..> IteradorAutores : crea recorrido en orden
+```
+
+Las operaciones de Fachada se muestran por nombre: sus parámetros y resultados
+se acordarán antes de implementarlas. Deben devolver datos o estados de error;
+no leen teclado ni imprimen mensajes. Esta vista no es aún una especificación UML
+completa lista para entregar.
+
+## Colecciones y estructuras
+
+Un **TAD** describe operaciones; una **estructura de datos** permite implementarlas.
+La colección encapsula su estructura privada. No hace falta que la colección sea
+una clase abstracta ni introducir una biblioteca genérica con `templates`.
+
+| Colección | TAD e implementación | Justificación |
+| --- | --- | --- |
+| Libros | Diccionario por ISBN, hash con encadenamiento | Aproximadamente 500 títulos; búsquedas frecuentes para registrar, asociar autor, consultar y vender (2, 3, 5 y 7). Búsqueda e inserción esperadas O(1) con buena dispersión y carga controlada; peor caso O(n). |
+| Autores | Diccionario por cédula, ABB | Cantidad sin cota; búsqueda por cédula y listado ascendente (1, 3 y 6). Búsqueda e inserción O(h), peor caso O(n); recorrido en orden O(n). |
+
+Los 500 títulos son una estimación, no una capacidad máxima. Las cadenas resuelven
+colisiones y admiten más elementos. El recorrido completo del hash cuesta
+O(n + cantidad de cubetas). El dimensionamiento y eventual crecimiento de la tabla
+se fijarán al implementarla.
+
+**ABB es suficiente para esta propuesta:** la letra no exige búsquedas O(log n).
+Puede degenerarse con claves ordenadas; AVL garantizaría O(log n), pero requiere
+balanceos que no son necesarios para satisfacer los requerimientos.
+
+No se agregan índices por editorial, precio o prefijo: esas consultas pueden recorrer
+los libros. Una lista como colección principal haría lineales las búsquedas por
+clave. Tampoco hace falta una lista circular para los recorridos finitos pedidos.
+En el teórico, LPPF se usa como secuencia con inserción por el final; aquí no hay
+un requerimiento que justifique agregar esa secuencia como colección adicional.
+
+**Iteradores:** permiten recorrer sin exponer nodos. El de libros recorre cubetas
+y cadenas; el de autores recorre el ABB en orden. No necesitan una jerarquía
+abstracta propia para esta primera implementación.
+
+> Hay archivos vacíos reservados con los nombres `HashLibros`, `ABBAutores`,
+> `IteradorHashLibros` e `IteradorABBAutores` de una propuesta anterior.
+> El diseño simplificado integra esas estructuras en las colecciones e iteradores
+> específicos; esos archivos no representan clases adicionales obligatorias.
+> Su eliminación o reutilización queda pendiente de acordar, sin cambiar código aquí.
+
+## Flujo de una venta
+
+Ejemplo del requerimiento 7: la presentación recibe el ISBN; la Fachada valida,
+la colección busca y el libro calcula el precio mediante polimorfismo.
+
+```mermaid
+flowchart TD
+    A[Presentacion recibe ISBN] --> B[Fachada consulta si existe]
+    B --> C{Existe el libro?}
+    C -- No --> D[Devolver estado ISBN inexistente]
+    D --> E[Presentacion muestra el error]
+    C -- Si --> F[Buscar Libro por ISBN]
+    F --> G[Invocar calcularPrecioVenta]
+    G --> H[Aplicar regla de Novela, Texto o Escolar]
+    H --> I[Incrementar unidades vendidas en uno]
+    I --> J[Devolver importe de venta]
+    J --> K[Presentacion muestra el importe]
+```
+
+## Memoria y precondiciones
+
+| Elemento | Representación y responsabilidad |
+| --- | --- |
+| Fecha | Objeto por valor dentro de Texto; no requiere memoria dinámica. |
+| Libros | `Libro*` para conservar el polimorfismo. La colección los elimina mediante destructor virtual. |
+| Autores | `Autor*` propiedad de su colección. |
+| Autor de Novela | Puntero inicialmente nulo, sin propiedad. Reasignarlo no copia ni elimina al autor. |
+| Nodos y cubetas | Privados de cada colección; se liberan al destruirla. |
+| Iteradores | No poseen los objetos recorridos; quien crea el iterador debe liberarlo. No modificar la colección durante el recorrido. |
+
+Al finalizar se destruyen libros antes que autores. Las colecciones propietarias
+no deben copiarse sin definir una política de copia, para evitar dobles liberaciones.
+No habrá bajas durante la ejecución, como establece la letra.
+
+### Qué destructores necesitamos
+
+Todas las clases tienen destructor, aunque C++ puede generarlo automáticamente.
+Declarar uno propio es necesario cuando debe realizar trabajo específico o ser virtual.
+
+| Clase | Destructor propio en este diseño | Responsabilidad |
+| --- | --- | --- |
+| Libro | Sí: público y virtual | Permitir `delete` seguro mediante `Libro*`. Su cuerpo puede estar vacío. |
+| ColeccionLibros | Sí: público | Eliminar cada libro una vez, los nodos de las cadenas y el arreglo dinámico de cubetas con `delete[]`. |
+| ColeccionAutores | Sí: público | Eliminar los nodos del ABB y cada Autor una vez, mediante recorrido postorden. |
+| Novela | No requiere uno escrito a mano | El destructor generado es virtual por Libro. Nunca debe eliminar su `Autor*`, que pertenece a la colección de autores. |
+| Texto y Escolar | No requieren uno escrito a mano | Sus miembros por valor se destruyen automáticamente; el destructor sigue siendo virtual por herencia. |
+| Autor | No requiere uno escrito a mano | Sus enteros y `std::string` se gestionan automáticamente. |
+| Fecha | No requiere uno escrito a mano | Solo contiene tres enteros. |
+| Fachada | No requiere uno escrito a mano con colecciones por valor | Sus colecciones se destruyen automáticamente en orden inverso a su declaración. Declarar autores antes que libros para destruir libros primero. No ejecutar `delete` sobre esos miembros. |
+| IteradorLibros | Depende de su representación | Si solo referencia cubetas y nodos ajenos, alcanza el destructor generado; nunca elimina los libros ni las cubetas. |
+| IteradorAutores | Depende de su representación | Si usa una pila dinámica propia para el recorrido en orden, debe liberar esa pila, sin eliminar autores ni nodos del ABB. Si usa solo referencias ajenas, no necesita liberación propia. |
+
+La necesidad de liberar los iteradores creados con `new` es independiente de si
+su destructor tiene cuerpo propio. Si finalmente se añaden recursos dinámicos
+propios a una clase, debe revisarse esta tabla y su política de copia.
+
+Las precondiciones se documentarán en los `.h` con `// PRECONDICION:` y una lista
+numerada cuando haya varias. La Fachada debe validar la entrada antes de delegar
+una operación que presuponga esos controles.
+
+| Operación | Precondición |
+| --- | --- |
+| `Fecha(dia, mes, anio)` | La fecha es válida; año entre 1 y 9999. Validar con `Fecha::esValida` antes de construir. |
+| Comparaciones de Fecha | Ambas fechas son válidas. |
+| `buscar(clave)` | La clave existe. |
+| `insertar(puntero)` | Puntero válido; clave no repetida; se transfiere la propiedad a la colección. |
+| `actual()` y `avanzar()` | `hayActual()` devuelve verdadero. |
+
+## Compilación y pruebas
+
+```text
+include/      Encabezados .h
+src/          Implementaciones .cpp; main del programa aún vacío
+tests/        Main independiente para pruebas
+.github/      Workflow de compilación, pruebas y cobertura
+```
+
+Desde la terminal de Visual Studio Code, ejecutar las pruebas actuales:
 
 ```sh
 mkdir -p build
@@ -13,97 +348,11 @@ g++ -std=c++11 -Wall -Wextra -pedantic -Iinclude src/Fecha.cpp tests/main.cpp -o
 ./build/p4_tests
 ```
 
-GitHub Actions compila, ejecuta las pruebas y exige un minimo de 90% de
-cobertura de lineas en src/.
-
-## Propuesta de TAD y estructuras de datos
-
-Esta es una propuesta de diseño para discutir antes de implementar. La letra
-pide justificar las colecciones; no impone hash, ABB ni AVL.
-
-Un TAD define las operaciones y su significado. La estructura elegida define
-como se guardan los datos para resolver esas operaciones. En objetos, una clase
-abstracta puede expresar el contrato y una clase concreta implementar la estructura.
-No es necesario que toda clase del sistema sea abstracta.
-
-| TAD / contrato | Implementacion propuesta | Motivo y requerimientos |
-| --- | --- | --- |
-| ColeccionLibros: diccionario por ISBN | HashLibros: tabla hash con encadenamiento | Hay aproximadamente 500 titulos. Registrar sin duplicados y consultar por ISBN son operaciones frecuentes (2, 3, 5 y 7). Busqueda e insercion esperadas O(1) con buena dispersion y carga controlada; peor caso O(n). |
-| ColeccionAutores: diccionario por cedula | ABBAutores: arbol binario de busqueda | No hay cota para autores. Permite buscar por cedula (1 y 3) y listar ordenados mediante recorrido en orden (6), en O(n) para el listado. Buscar e insertar cuestan O(h), y pueden llegar a O(n) si el arbol se degenera. |
-| IteradorLibros: recorrido de libros | IteradorHashLibros | Recorre cubetas y sus cadenas para los requerimientos 4, 8, 9 y 10, sin exponer nodos a la Fachada. |
-| IteradorAutores: recorrido ordenado de autores | IteradorABBAutores | Recorre el ABB en orden para el requerimiento 6, sin exponer nodos a la Fachada. |
-
-La cantidad aproximada de libros permite elegir una cantidad inicial de cubetas;
-no significa que 500 sea un limite obligatorio. Las colisiones se resolveran con
-cadenas de nodos enlazados, que tambien permiten superar esa estimacion. Los
-recorridos completos del hash cuestan O(n + cantidad de cubetas).
-
-### ABB, AVL y listas
-
-Se propone ABB como punto inicial por su menor complejidad de implementacion.
-AVL es una alternativa si se requiere garantizar O(log n) para buscar e insertar
-autores, incluso con cedulas ingresadas en orden; agrega balanceos y rotaciones.
-La ausencia de cota por si sola no obliga a usar AVL ni impide usar hash.
-
-Una lista enlazada permite insercion sencilla y recorrido secuencial, pero buscar
-un ISBN o una cedula cuesta O(n). Por eso se usaran cadenas enlazadas para las
-colisiones del hash, sin agregar por ahora una segunda lista con todos los libros.
-Una lista circular no aporta una ventaja para los recorridos finitos pedidos.
-La sigla LPPF debe confirmarse con la nomenclatura del curso antes de atribuirle
-una estructura y compararla en la documentacion definitiva.
-
-No se agregan indices por editorial, precio ni titulo: con unos 500 libros alcanza
-un recorrido completo para los requerimientos 4, 8, 9 y 10. Asi se evita mantener
-indices adicionales. Si aumentara mucho el volumen, esta decision se revisaria.
-
-### Contratos propuestos para las colecciones
-
-- ColeccionLibros: estaVacia, existe(isbn), buscar(isbn), insertar(libro), crearIterador.
-- ColeccionAutores: estaVacia, existe(cedula), buscar(cedula), insertar(autor), crearIterador.
-- Iteradores: hayActual, actual, avanzar. El recorrido comienza en el primer elemento.
-- buscar: PRECONDICION: la clave existe.
-- insertar: PRECONDICION: el puntero es valido y la clave no existe.
-- actual y avanzar: PRECONDICION: hayActual devuelve verdadero.
-
-Los chequeos de existencia los realiza la logica antes de llamar operaciones con
-esas precondiciones. Las interfaces abstractas tendran destructor virtual.
-Cada iterador se liberara al terminar su uso y no sera propietario de los objetos
-que recorre. La coleccion no se modificara mientras se use su iterador.
-
-### Objetos, punteros y memoria
-
-- Fecha se guarda por valor dentro de Texto: es un dato pequeno con tres enteros.
-- La coleccion de libros guarda Libro* para conservar el polimorfismo de Novela,
-  Texto y Escolar. Libro necesitara destructor virtual.
-- La coleccion de autores guarda Autor* y es propietaria de esos objetos.
-- Novela guarda Autor* como referencia al autor registrado, inicialmente nula;
-  no copia al autor ni lo elimina. Reasignar autor solo cambia esa referencia.
-- Cada coleccion elimina una sola vez sus objetos y sus nodos al finalizar.
-  Primero se destruyen libros y despues autores. Se evitara copiar colecciones
-  propietarias para no duplicar la liberacion de memoria.
-
-### Fecha y capas
-
-Fecha::esMenor(Fecha(1, 1, 2026)) permite aplicar el descuento de los textos
-publicados antes del corte exigido. No se pide un listado por fecha en esta version.
-Las comparaciones mayor e igual quedan disponibles como operaciones del tipo.
-
-Fachada coordina las operaciones y delega en las colecciones y entidades.
-La entrada por teclado y los mensajes se resuelven en la capa de presentacion;
-los nodos, cubetas y recorridos internos pertenecen a las estructuras.
-
-### Orden incremental de implementacion
-
-1. Fecha y sus pruebas.
-2. Autor, Libro y las subclases Novela, Texto y Escolar, con sus pruebas.
-3. Contratos de colecciones e iteradores.
-4. HashLibros e IteradorHashLibros, probando colisiones y recorridos vacios.
-5. ABBAutores e IteradorABBAutores, probando orden y busqueda.
-6. Fachada y los diez requerimientos, con pruebas de integracion.
-7. Programa principal y configuracion de entrega para Code::Blocks.
-
-Los archivos nuevos de estructuras e iteradores se reservan vacios. La propuesta
-no constituye aun la especificacion UML completa exigida para la entrega.
+La CI ejecuta las pruebas y exige 90% de cobertura de líneas sobre el código de
+`src/` que se compila e instrumenta. Hoy solo se compila `Fecha.cpp`.
+Cada implementación nueva debe incorporarse al comando de compilación junto con
+sus pruebas para que entre en la medición; reservar un archivo no aporta cobertura.
+La configuración de Code::Blocks para la entrega todavía está pendiente.
 
 ## Plan por fases para tres integrantes (sin fechas)
 
@@ -114,7 +363,7 @@ a partir de develop actualizado. No se trabaja directamente en develop.
 | Fase | Integrante A | Integrante B | Integrante C | Condicion para cerrar la fase |
 | --- | --- | --- | --- | --- |
 | 1. Acuerdos y base | Fecha: validacion y comparaciones | Autor: datos y consultas | Libro: datos comunes y contrato de precio | Acordar firmas, tipos de claves, resultados de error y propiedad de punteros; probar las tres clases |
-| 2. Trabajo paralelo | Novela, Texto y Escolar: precios, fecha y asociacion con Autor | ColeccionAutores, ABBAutores y sus iteradores | ColeccionLibros, HashLibros y sus iteradores | Compilar las interfaces acordadas; probar descuentos, orden, duplicados, colisiones y recorridos |
+| 2. Trabajo paralelo | Novela, Texto y Escolar: precios, fecha y asociacion con Autor | ColeccionAutores con ABB y su iterador | ColeccionLibros con hash y su iterador | Compilar las interfaces acordadas; probar descuentos, orden, duplicados, colisiones y recorridos |
 | 3. Operaciones de logica | Consultas de libros: prefijo y detalle (4 y 5) | Registro de autores y listado ordenado (1 y 6) | Registro de libros y asociacion de autor (2 y 3) | Probar operaciones vacias, claves inexistentes y resultados correctos |
 | 4. Ventas y consultas agregadas | Ventas y precio final (7) | Recaudacion por editorial y libro mas vendido (8 y 10) | Unidades vendidas por precio y tipo (9) | Probar ventas sucesivas, tipos de libro, ausencia de editorial y empates |
 | 5. Integracion y entrega | Main, entrada y mensajes | UML y justificacion de estructuras y memoria | Proyecto Code::Blocks y revision del paquete | Los diez requerimientos funcionan, CI pasa con cobertura minima 90%, documentos y codigo coinciden |
