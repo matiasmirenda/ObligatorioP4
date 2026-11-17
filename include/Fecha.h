@@ -1,37 +1,36 @@
 #ifndef FECHA_H
 #define FECHA_H
 
-class Fecha {
+class Fecha
+{
 private:
     int dia;
     int mes;
     int anio;
 
 public:
-    // PRECONDICION:
-    // 1- Los valores deben formar una fecha valida (anio entre 1 y 9999).
-    Fecha(int dia, int mes, int anio);
+    Fecha();
+    // Guarda los componentes; comprobar esValida() antes de comparar.
+    Fecha(int, int, int);
+    Fecha(const Fecha&);
+    Fecha operator=(const Fecha&);
 
-    // PRECONDICION: Ninguna.
-    int getDia() const;
-    // PRECONDICION: Ninguna.
-    int getMes() const;
-    // PRECONDICION: Ninguna.
-    int getAnio() const;
+    int getDia();
+    int getMes();
+    int getAnio();
 
-    // Comprueba los dias de cada mes y los anios bisiestos.
-    // PRECONDICION: Ninguna.
-    static bool esValida(int dia, int mes, int anio);
+    // Valida el calendario y limita el anio a 1900..2099.
+    bool esValida();
 
     // PRECONDICION:
     // 1- Ambas fechas deben ser validas.
-    bool esMenor(const Fecha& otra) const;
+    bool operator<(Fecha);
     // PRECONDICION:
     // 1- Ambas fechas deben ser validas.
-    bool esMayor(const Fecha& otra) const;
+    bool operator>(Fecha);
     // PRECONDICION:
     // 1- Ambas fechas deben ser validas.
-    bool esIgual(const Fecha& otra) const;
+    bool operator==(Fecha);
 };
 
 #endif

@@ -1,9 +1,26 @@
+# Archivos de macOS
+.DS_Store
+
+# Compilación
 /bin/
 /obj/
 *.o
 *.exe
 /build/
 /build-coverage/
+
+# Salidas de compilación y cobertura
+/build-*/
 *.gcda
 *.gcno
 *.gcov
+*.gcov.json.gz
+*.gcov.json
+*.dSYM/
+
+# Guías personales de estudio
+# El README principal sigue versionado
+/docs/clases/
+/docs/guia-codigo.md
+/docs/guia-pruebas.md
+/docs/guia-build-ci.md
