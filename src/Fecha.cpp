@@ -1,39 +1,79 @@
 #include "Fecha.h"
 
-Fecha::Fecha(int dia, int mes, int anio) : dia(dia), mes(mes), anio(anio) {}
-
-int Fecha::getDia() const { return dia; }
-int Fecha::getMes() const { return mes; }
-int Fecha::getAnio() const { return anio; }
-
-bool Fecha::esValida(int dia, int mes, int anio) {
-    if (anio < 1 || anio > 9999 || mes < 1 || mes > 12 || dia < 1) {
-        return false;
-    }
-    int diasDelMes = 31;
-    if (mes == 4 || mes == 6 || mes == 9 || mes == 11) {
-        diasDelMes = 30;
-    } else if (mes == 2) {
-        bool bisiesto = anio % 400 == 0 || (anio % 4 == 0 && anio % 100 != 0);
-        diasDelMes = bisiesto ? 29 : 28;
-    }
-    return dia <= diasDelMes;
+Fecha::Fecha()
+{
+    dia = 1;
+    mes = 1;
+    anio = 2000;
 }
 
-bool Fecha::esMenor(const Fecha& otra) const {
-    if (anio != otra.anio) {
+Fecha::Fecha(int d, int m, int a)
+{
+    dia = d;
+    mes = m;
+    anio = a;
+}
+
+Fecha::Fecha(const Fecha& otra)
+{
+    dia = otra.dia;
+    mes = otra.mes;
+    anio = otra.anio;
+}
+
+int Fecha::getDia() { return dia; }
+int Fecha::getMes() { return mes; }
+int Fecha::getAnio() { return anio; }
+
+bool Fecha::esValida()
+{
+    bool valida = false;
+    if (anio >= 1900 && anio <= 2099)
+    {
+        switch (mes)
+        {
+        case 1: case 3: case 5: case 7: case 8: case 10: case 12:
+            valida = dia >= 1 && dia <= 31;
+            break;
+        case 4: case 6: case 9: case 11:
+            valida = dia >= 1 && dia <= 30;
+            break;
+        case 2:
+            if (anio % 400 == 0 || (anio % 4 == 0 && anio % 100 != 0))
+                valida = dia >= 1 && dia <= 29;
+            else
+                valida = dia >= 1 && dia <= 28;
+            break;
+        default:
+            valida = false;
+        }
+    }
+    return valida;
+}
+
+bool Fecha::operator<(Fecha otra)
+{
+    if (anio != otra.anio)
         return anio < otra.anio;
-    }
-    if (mes != otra.mes) {
+    if (mes != otra.mes)
         return mes < otra.mes;
-    }
     return dia < otra.dia;
 }
 
-bool Fecha::esMayor(const Fecha& otra) const {
-    return otra.esMenor(*this);
+bool Fecha::operator>(Fecha otra)
+{
+    return otra < *this;
 }
 
-bool Fecha::esIgual(const Fecha& otra) const {
+bool Fecha::operator==(Fecha otra)
+{
     return dia == otra.dia && mes == otra.mes && anio == otra.anio;
+}
+
+Fecha Fecha::operator=(const Fecha& otro)
+{
+    dia = otro.dia;
+    mes = otro.mes;
+    anio = otro.anio;
+    return *this;
 }

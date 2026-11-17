@@ -24,15 +24,12 @@ jobs:
           python-version: '3.x'
 
       - name: Install gcovr
-        run: python -m pip install gcovr
+        run: python -m pip install gcovr==8.5
 
-      - name: Build
-        run: |
-          mkdir -p build
-          g++ -std=c++11 --coverage -O0 -g -Wall -Wextra -pedantic -Iinclude src/Fecha.cpp tests/main.cpp -o build/p4_tests
-
-      - name: Run tests
-        run: ./build/p4_tests
+      - name: Compile all modules and run unit tests
+        env:
+          CXX: g++
+        run: sh scripts/test.sh --coverage
 
       - name: Enforce 90% line coverage for source files
-        run: gcovr --root . --filter 'src/' --fail-under-line 90 build
+        run: gcovr --root . --filter 'src/' --merge-lines --fail-under-line 90 build-coverage
