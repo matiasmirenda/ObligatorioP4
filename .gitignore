@@ -3,7 +3,6 @@
 
 # Compilación
 /bin/
-/scripts/
 /obj/
 *.o
 *.exe
