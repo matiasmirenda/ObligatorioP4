@@ -1,7 +1,7 @@
 #ifndef AUTOR_H
 #define AUTOR_H
 
-#include "String.h"
+#include "Str.h"
 
 class Autor
 {

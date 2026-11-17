@@ -1,4 +1,4 @@
-#include "String.h"
+#include "Str.h"
 #include <string.h>
 
 String::String()
