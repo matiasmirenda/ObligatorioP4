@@ -25,6 +25,6 @@ public:
     // 3- El llamador transfiere la propiedad del objeto a la estructura.
     void insertar(Libro*);
     // El llamador elimina el iterador antes de destruir la coleccion.
-    IteradorLibros* crearIterador();
+    IteradorLibros* crearIterador();//Comentario
 };
 #endif
