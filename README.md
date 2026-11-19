@@ -73,7 +73,7 @@ ColeccionLibros y ColeccionAutores.
 | Diccionario de autores | ABB por cédula | Permite buscar por cédula y obtener el listado ascendente mediante recorrido en orden. Buscar e insertar cuesta O(h); puede llegar a O(n) si el árbol se degenera. El listado completo cuesta O(n). |
 | Secuencia de referencias del iterador | LPPF | Agregar al final cuesta O(1) y conserva el orden de carga, especialmente el orden ascendente de los autores. Cada avance cuesta O(1), sin necesitar una capacidad máxima. |
 
-El hash actual tiene 1009 cubetas y dispersa con ISBN % 1009. Los 500 títulos son
+El hash actual tiene 500 cubetas y dispersa con ISBN % 500. Los 500 títulos son
 una estimación, no una capacidad máxima. Recorrer todas las cubetas cuesta
 O(n + cantidad de cubetas). Las listas de colisiones insertan al principio;
 no necesitan un enlace hacia atrás, un puntero al fondo ni circularidad.
@@ -86,7 +86,7 @@ necesiten estos recorridos finitos.
 
 En el diagrama, las colecciones tienen los atributos `tabla: Hash` y `tabla: ABB`.
 Las estructuras se implementan en HashLibros y ABBAutores, separadas de las
-colecciones. Cada una encapsula su struct Nodo: el hash contiene una tabla de
+colecciones. Cada una encapsula su struct Nodo: el hash contiene un arreglo fijo de 500
 punteros a listas; el ABB contiene una raíz con hijos izquierdo y derecho.
 El iterador guarda referencias Objeto* en sus propios nodos de LPPF.
 
@@ -99,9 +99,11 @@ sus nodos auxiliares. Se destruyen primero libros y después autores.
 Los requerimientos se toman de la letra. Cada ficha presenta entrada, salida y
 proceso. La Fachada coordina los chequeos y devuelve los resultados; la capa de
 presentación muestra los mensajes y listados. Los recorridos no duplican objetos.
-En todos los requerimientos se asume que los datos de entrada son válidos según
-su dominio. El desglose conserva los chequeos de existencia, duplicados y resultados
-vacíos pedidos por la letra; no agrega validaciones de formato ni de rangos.
+Las fichas describen los requerimientos con entradas válidas según su dominio.
+Antes de ejecutarlos, el menú valida el formato y los rangos de entrada, incluida
+la validez de las fechas. La Fachada también rechaza altas con datos inválidos.
+El desglose conserva los chequeos de existencia, duplicados y resultados vacíos
+pedidos por la letra.
 
 ### Requerimiento 1
 
@@ -201,115 +203,189 @@ vacíos pedidos por la letra; no agrega validaciones de formato ni de rangos.
 | Texto común | Publicado antes del 01/01/2026: 75% del precio base. En otro caso, precio base. |
 | Escolar | Se calcula como Texto; de primero a tercero se aplica además 10% de descuento sobre ese resultado. |
 
+### Contrato de la Fachada y controles
+
+Se sigue el Práctico 5, ejercicio 5: un enumerado `TipoError` y un parámetro
+`TipoError&` de salida, en lugar de varios booleanos. Cada operación que recibe `TipoError&` establece
+`SIN_ERROR` al comenzar y devuelve el primer error detectado. La presentación
+convierte el resultado en un mensaje con `mensajeError(TipoError)`, definido en
+`MensajesError.h/.cpp`; la lógica no usa `cin` ni `cout`. La Fachada incluye
+`TipoError.h`, y el menú incluye `MensajesError.h`. Ambos módulos están
+conectados con la Fachada y el menú implementados.
+`TipoError` es un `enum`, no una clase ni un `struct`: define los códigos posibles.
+La función de mensajes es independiente del enumerado y pertenece a presentación.
+No imprime: devuelve un `string` para que el menú lo muestre.
+
+Valores definidos en `TipoError.h`: `SIN_ERROR`, `AUTOR_YA_EXISTE`, `LIBRO_YA_EXISTE`,
+`LIBRO_NO_EXISTE`, `AUTOR_NO_EXISTE`, `LIBRO_NO_ES_NOVELA`,
+`SIN_COINCIDENCIAS`, `SIN_AUTORES`, `SIN_LIBROS_DE_EDITORIAL`,
+`DATOS_INVALIDOS` y `LIMITE_VENTAS`.
+
+| Requerimiento / método | Controles y resultados |
+| --- | --- |
+| 1 · registrarAutor | Si la cédula no es positiva o falta nombre o apellido: DATOS_INVALIDOS. Si la cédula existe: AUTOR_YA_EXISTE. En otro caso, crear e insertar el autor. |
+| 2 · registrarLibro | Si el puntero es NULL, los datos son inválidos o ya tiene ventas: DATOS_INVALIDOS. Si el ISBN existe: LIBRO_YA_EXISTE. En otro caso, insertar el libro recibido, inicialmente con cero ventas. |
+| 3 · asociarAutor | Comprobar ISBN, que sea una novela y cédula, en ese orden. Devolver LIBRO_NO_EXISTE, LIBRO_NO_ES_NOVELA o AUTOR_NO_EXISTE según corresponda. Solo asociar si todos los controles pasan. |
+| 4 · listarPorPrefijo | Cargar las coincidencias. Si no hay: SIN_COINCIDENCIAS. |
+| 5 · consultarLibro | Si no existe el ISBN: LIBRO_NO_EXISTE. En otro caso, devolver una referencia prestada al libro. |
+| 6 · listarAutores | Si no hay autores: SIN_AUTORES. En otro caso, cargar el recorrido ascendente por cédula. |
+| 7 · registrarVenta | Si no existe el ISBN: LIBRO_NO_EXISTE. Si alcanzó el máximo representable por int: LIMITE_VENTAS. En otro caso, calcular el importe e incrementar las ventas. |
+| 8 · calcularRecaudacion | Devolver el total; cero también es un resultado válido. No necesita TipoError. |
+| 9 · contarVentasPorTipo | Devolver los tres acumuladores por referencia; cero es válido. No necesita TipoError. |
+| 10 · consultarMasVendido | Si no hay libros de la editorial: SIN_LIBROS_DE_EDITORIAL. En otro caso, devolver una referencia prestada a uno de los máximos. |
+
+La presentación valida que las entradas puedan leerse y pertenezcan al dominio:
+por ejemplo, una opción de menú permitida y una fecha que cumpla `esValida()`.
+La Fachada comprueba existencia, duplicados, tipo de libro y resultados vacíos
+antes de llamar a las primitivas con precondiciones. El control de tipo del
+requerimiento 3 evita tratar un Texto o Escolar como Novela.
+
+`registrarLibro` comprueba que el puntero no sea nulo, que `datosValidos()` sea
+verdadero y que tenga cero ventas antes de acceder a la colección. Si el registro tiene éxito, la colección pasa
+a ser su propietaria; si falla, el llamador conserva la propiedad y debe eliminarlo
+o reutilizarlo. La Fachada comprueba cédula positiva y nombre y apellido no vacíos en
+`registrarAutor`; crea el objeto únicamente si la cédula no está registrada.
+
+Los iteradores de salida se reciben vacíos y se usan mientras exista la colección.
+En las consultas que devuelven `Libro*&`, se establece el puntero en `NULL` al
+comenzar; solo contiene un libro si el resultado es `SIN_ERROR`. El importe de
+`registrarVenta` se inicializa en cero y solo representa una venta si no hubo error.
+Los punteros de consulta son prestados: el menú no elimina esos libros ni sus autores.
+
+### Menú y separación en capas
+
+`Menu.h/.cpp` implementa la presentación; `main.cpp` llama a `ejecutarMenu()`: un ciclo `while` muestra opciones del 1 al 10,
+correspondientes a los requerimientos en el mismo orden, y 0 para salir. Un `switch`
+selecciona la operación y llama a la Fachada; el menú no accede directamente a las
+colecciones. El fin de la entrada también termina el programa.
+
+Antes de llamar a la lógica, se comprueban números completos y dentro de rango,
+textos no vacíos, precios finitos no negativos, fechas reales entre 1900 y 2099 y
+años escolares entre 1 y 6. Una entrada inválida se vuelve a pedir. Las líneas se leen con `cin.get()` hasta
+el salto de línea, siguiendo el recorrido de `scan()` del Práctico 5; después
+se comprueban los dígitos del número. Los precios aceptan notación decimal con punto.
+Las fechas se
+comprueban con `esValida()` antes de crear el libro. Los textos conservan espacios,
+mayúsculas y minúsculas para respetar la búsqueda exacta por comienzo del título.
+
+El menú usa `using namespace std`, `cout`, `cin.get()`, ciclos, condiciones y
+`switch`. No usa `fixed`, `setprecision`, `getline` ni `istringstream`.
+Los auxiliares de validación son propios del proyecto: el práctico muestra la
+lectura carácter por carácter, pero no un menú completo con todos estos controles.
+`cin.eof()` detecta el fin de entrada; `LONG_MAX` y `DBL_MAX` son los límites de los
+tipos numéricos, usados para evitar valores que no puedan representarse.
+
+La Fachada garantiza los controles de negocio antes de llamar a `buscar`,
+`insertar`, `asignarAutor`, `calcularPrecioVenta` y `registrarVenta`. El menú traduce
+TipoError con `mensajeError` y muestra los datos; la Fachada no imprime. Los iteradores
+son variables locales, se pasan por referencia y no eliminan los objetos listados.
+Al salir, se destruye la Fachada, primero sus libros y luego sus autores.
+
 ## 5. Diagrama de implementación
 
 Un único diagrama reúne las entidades completas, colecciones, tipos auxiliares,
-Fachada y el iterador común del diseño propuesto. El rombo blanco de Novela a
+Fachada y el iterador común del diseño implementado. El rombo blanco de Novela a
 Autor expresa agregación sin transferir la propiedad del autor a la novela.
 El iterador se muestra suelto con `<<iterator>>`; los diccionarios se identifican
-con `<<diccionario>>`.
+con `<<diccionario>>`. La lectura va de izquierda a derecha: Fachada,
+colecciones y entidades. El iterador permanece independiente.
 
 ```mermaid
 classDiagram
-    direction TB
+    direction LR
+
+    Fachada "1" o-- "1" ColeccionLibros
+    Fachada "1" o-- "1" ColeccionAutores
+    ColeccionLibros "1" o-- "0..*" Libro
+    ColeccionAutores "1" o-- "0..*" Autor
+    Objeto <|-- Autor
+    Objeto <|-- Libro
+    Libro <|-- Novela
+    Libro <|-- Texto
+    Texto <|-- Escolar
+    Novela "0..*" o-- "0..1" Autor
+    Texto "1" *-- "1" Fecha
+
     class Objeto {
-        +Objeto()
+        <<abstract>>
         +~Objeto()
+        +getId()* long int
     }
     class Libro {
         <<abstract>>
-        -isbn: long long
-        -titulo: String
-        -editorial: String
+        -isbn: long int
+        -titulo: string
+        -editorial: string
         -precioBase: double
         -unidadesVendidas: int
-        +Libro(long long, String, String, double)
-        +Libro(const Libro&)
+        +Libro(long int, string, string, double)
         +~Libro()
-        +getIsbn() long long
-        +getTitulo() String
-        +getEditorial() String
+        +getId() long int
+        +getTitulo() string
+        +getEditorial() string
         +getPrecioBase() double
         +getUnidadesVendidas() int
-        +setTitulo(String) void
-        +setEditorial(String) void
-        +setPrecioBase(double) void
         +registrarVenta() void
-        +comienzaCon(String) bool
+        +comienzaCon(string) bool
         +datosValidos() bool
         +calcularPrecioVenta()* double
-        +getTipo()* String
+        +getTipo()* string
     }
     class Novela {
-        -genero: String
+        -tipo: const string
+        -genero: string
         -autor: Autor#42;
-        +Novela(long long, String, String, double, String)
-        +Novela(const Novela&)
+        +Novela(long int, string, string, double, string)
         +~Novela()
-        +getGenero() String
-        +getAutor() Autor#42;
-        +setGenero(String) void
-        +asignarAutor(Autor#42;) void
+        +getGenero() string
+        +getAutor() Autor #42;
+        +asignarAutor(Autor #42;) void
         +datosValidos() bool
         +calcularPrecioVenta() double
-        +getTipo() String
+        +getTipo() string
     }
     class Texto {
-        -materia: String
+        -tipo: const string
+        -materia: string
         -fechaPublicado: Fecha
-        +Texto(long long, String, String, double, String, Fecha)
-        +Texto(const Texto&)
+        +Texto(long int, string, string, double, string, Fecha)
         +~Texto()
-        +getMateria() String
+        +getMateria() string
         +getFechaPublicado() Fecha
-        +setMateria(String) void
-        +setFechaPublicado(Fecha) void
         +datosValidos() bool
         +calcularPrecioVenta() double
-        +getTipo() String
+        +getTipo() string
     }
     class Escolar {
+        -tipo: const string
         -anioEscuela: int
-        +Escolar(long long, String, String, double, String, Fecha, int)
-        +Escolar(const Escolar&)
+        +Escolar(long int, string, string, double, string, Fecha, int)
         +~Escolar()
         +getAnioEscuela() int
-        +setAnioEscuela(int) void
         +datosValidos() bool
         +calcularPrecioVenta() double
-        +getTipo() String
+        +getTipo() string
     }
     class Autor {
-        -cedula: long
-        -nombre: String
-        -apellido: String
-        +Autor()
-        +Autor(long, String, String)
-        +Autor(const Autor &)
+        -cedula: long int
+        -nombre: string
+        -apellido: string
+        +Autor(long int, string, string)
         +~Autor()
-        +operator=(const Autor &) Autor
-        +getCedula() long
-        +getNombre() String
-        +getApellido() String
-        +setNombre(String) void
-        +setApellido(String) void
-        +datosValidos() bool
+        +getId() long int
+        +getNombre() string
+        +getApellido() string
     }
     class Fecha {
         -dia: int
         -mes: int
         -anio: int
-        +Fecha()
         +Fecha(int, int, int)
-        +Fecha(const Fecha&)
-        +operator=(const Fecha&) Fecha
         +getDia() int
         +getMes() int
         +getAnio() int
         +esValida() bool
         +operator<(Fecha) bool
-        +operator>(Fecha) bool
-        +operator==(Fecha) bool
     }
     class ColeccionLibros {
         <<diccionario>>
@@ -317,11 +393,10 @@ classDiagram
         +ColeccionLibros()
         +~ColeccionLibros()
         +estaVacia() bool
-        +getCantidad() int
-        +existe(long long) bool
-        +buscar(long long) Libro#42;
+        +existe(long int) bool
+        +buscar(long int) Libro#42;
         +insertar(Libro#42;) void
-        +crearIterador() Iterador#42;
+        +cargarIterador(Iterador&) void
     }
     class ColeccionAutores {
         <<diccionario>>
@@ -329,11 +404,10 @@ classDiagram
         +ColeccionAutores()
         +~ColeccionAutores()
         +estaVacia() bool
-        +getCantidad() int
-        +existe(long) bool
-        +buscar(long) Autor#42;
+        +existe(long int) bool
+        +buscar(long int) Autor#42;
         +insertar(Autor#42;) void
-        +crearIterador() Iterador#42;
+        +cargarIterador(Iterador&) void
     }
     class Iterador {
         <<iterator>>
@@ -346,35 +420,41 @@ classDiagram
         +actual() Objeto#42;
         +avanzar() void
     }
+    class TipoError {
+        <<enumeration>>
+        SIN_ERROR
+        AUTOR_YA_EXISTE
+        LIBRO_YA_EXISTE
+        LIBRO_NO_EXISTE
+        AUTOR_NO_EXISTE
+        LIBRO_NO_ES_NOVELA
+        SIN_COINCIDENCIAS
+        SIN_AUTORES
+        SIN_LIBROS_DE_EDITORIAL
+        DATOS_INVALIDOS
+        LIMITE_VENTAS
+    }
     class Fachada {
         <<fachada>>
         -autores: ColeccionAutores
         -libros: ColeccionLibros
         +Fachada()
         +~Fachada()
-        +registrarAutor(long, String, String, bool&) void
-        +registrarLibro(Libro#42;, bool&) void
-        +asociarAutor(long long, long, bool&) void
-        +listarPorPrefijo(String, Iterador&, bool&) void
-        +consultarLibro(long long, Libro#42;&, bool&) void
-        +listarAutores(Iterador&, bool&) void
-        +registrarVenta(long long, double&, bool&) void
-        +calcularRecaudacion(String) double
-        +contarVentasPorTipo(double, long long&, long long&, long long&) void
-        +consultarMasVendido(String, Libro#42;&, bool&) void
+        +registrarAutor(long int, string, string, TipoError&) void
+        +registrarLibro(Libro#42;, TipoError&) void
+        +asociarAutor(long int, long int, TipoError&) void
+        +listarPorPrefijo(string, Iterador&, TipoError&) void
+        +consultarLibro(long int, Libro#42;&, TipoError&) void
+        +listarAutores(Iterador&, TipoError&) void
+        +registrarVenta(long int, double&, TipoError&) void
+        +calcularRecaudacion(string) double
+        +contarVentasPorTipo(double, long int&, long int&, long int&) void
+        +consultarMasVendido(string, Libro#42;&, TipoError&) void
     }
-    Objeto <|-- Libro
-    Objeto <|-- Autor
-    Libro <|-- Novela
-    Libro <|-- Texto
-    Texto <|-- Escolar
-    Novela "0..*" o-- "0..1" Autor
-    Texto "1" *-- "1" Fecha
-    ColeccionLibros "1" o-- "0..*" Libro
-    ColeccionAutores "1" o-- "0..*" Autor
-    Fachada "1" o-- "1" ColeccionLibros
-    Fachada "1" o-- "1" ColeccionAutores
 ```
+
+Cada función que devuelve un valor usa un único `return` al final, con el valor
+entre paréntesis. Las funciones `void`, constructores y destructores no lo necesitan.
 
 Los atributos privados llevan `-` y los métodos públicos llevan `+`. Los parámetros
 se indican solo con sus tipos. Los métodos abstractos de Libro se muestran en
@@ -382,11 +462,21 @@ cursiva. `*` significa puntero; en el fuente Mermaid se escribe `#42;` para evit
 que se interprete como marca de método abstracto. Los retornos y referencias se
 leen con la notación habitual de C++.
 
-Los textos usan la clase String de Str.h, basada en el práctico. Los miembros
-String se destruyen automáticamente; los destructores vacíos de las entidades
-no llaman manualmente a sus destructores. Objeto y Libro tendrán destructor
-virtual para permitir la destrucción a través del tipo base.
+Los textos usan `string` estándar de C++. Sus miembros se destruyen
+automáticamente; los destructores vacíos no llaman manualmente a sus destructores.
+Objeto tiene destructor virtual; Libro y Autor lo conservan por herencia.
+Novela, Texto y Escolar inicializan su constante privada `tipo` en el constructor;
+`getTipo()` devuelve esa constante. El precio se calcula mediante polimorfismo,
+sin comparar esos textos.
 
-**Estado del diseño:** las entidades y estructuras existen en el código actual.
-La herencia desde Objeto, el iterador común y las firmas de Fachada son propuestas
-pendientes de trasladar al código. Esta rama modifica únicamente el README.
+Objeto declara `getId()` abstracto. Libro lo implementa devolviendo ISBN y Autor
+devolviendo cédula, sin agregar otro atributo identificador. El iterador almacena
+Objeto* y no posee los objetos: libera únicamente los nodos de su LPPF.
+Al recuperarlos, el llamador conoce si el recorrido fue cargado con libros o autores.
+
+**Estado del diseño:** las entidades, las estructuras separadas, Objeto, el
+iterador común, TipoError, la función de mensajes, la Fachada y el menú están
+implementados. Hay pruebas de las clases y de los diez requerimientos mediante
+la Fachada, además de pruebas del menú ejecutando el programa con entradas de consola.
+Las pruebas del menú están en el mismo programa de pruebas C++ y verifican
+sus entradas y salidas; también se incluyen en la medición de cobertura.
