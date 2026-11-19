@@ -4,17 +4,15 @@
 class Escolar : public Texto
 {
 private:
+    const string tipo;
     int anioEscuela;
+
 public:
-    Escolar(long long, String, String, double, String, Fecha, int);
-    Escolar(const Escolar&);
+    Escolar(long int, string, string, double, string, Fecha, int);
     ~Escolar();
     int getAnioEscuela();
-    // PRECONDICION:
-    // 1- El anio escolar esta entre 1 y 6.
-    void setAnioEscuela(int);
     bool datosValidos();
     double calcularPrecioVenta();
-    String getTipo();
+    string getTipo();
 };
 #endif

@@ -5,22 +5,17 @@
 class Texto : public Libro
 {
 private:
-    String materia;
-    Fecha fechaPublicado;
+    const string tipo;
+    string materia;
+    Fecha fechaPublicado; // Valor propio del texto, sin new ni delete.
+
 public:
-    Texto(long long, String, String, double, String, Fecha);
-    Texto(const Texto&);
+    Texto(long int, string, string, double, string, Fecha);
     ~Texto();
-    String getMateria();
+    string getMateria();
     Fecha getFechaPublicado();
-    // PRECONDICION:
-    // 1- La materia no esta vacia.
-    void setMateria(String);
-    // PRECONDICION:
-    // 1- La nueva fecha es valida.
-    void setFechaPublicado(Fecha);
     bool datosValidos();
     double calcularPrecioVenta();
-    String getTipo();
+    string getTipo();
 };
 #endif

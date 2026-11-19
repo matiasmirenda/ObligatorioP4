@@ -1,67 +1,81 @@
 #include "HashLibros.h"
 #include <cstddef>
+
 HashLibros::HashLibros()
 {
-    cantidadCubetas = 1009;
-    cantidad = 0;
-    cubetas = new Nodo*[cantidadCubetas];
-    for (int i = 0; i < cantidadCubetas; i++)
-        cubetas[i] = NULL;
+    for (int i = 0; i < CUBETAS_LIBROS; i++)
+        crearLista(cubetas[i]);
 }
 HashLibros::~HashLibros()
 {
-    for (int i = 0; i < cantidadCubetas; i++)
+    for (int i = 0; i < CUBETAS_LIBROS; i++)
+        destruirLista(cubetas[i]);
+}
+int HashLibros::h(long int isbn) { return (isbn % CUBETAS_LIBROS); }
+bool HashLibros::estaVacia()
+{
+    int i = 0;
+    while (i < CUBETAS_LIBROS && cubetas[i] == NULL)
+        i++;
+    return (i == CUBETAS_LIBROS);
+}
+bool HashLibros::existe(long int isbn)
+{
+    bool pertenece = false;
+    if (isbn > 0)
+        pertenece = perteneceLista(cubetas[h(isbn)], isbn);
+    return (pertenece);
+}
+Libro *HashLibros::buscar(long int isbn)
+{
+    return (obtenerEnLista(cubetas[h(isbn)], isbn));
+}
+void HashLibros::insertar(Libro *libro)
+{
+    insFrontEnLista(cubetas[h(libro->getId())], libro);
+}
+void HashLibros::crearLista(Nodo*& lista)
+{
+    lista = NULL;
+}
+void HashLibros::destruirLista(Nodo*& lista)
+{
+    while (lista != NULL)
     {
-        Nodo* actual = cubetas[i];
-        while (actual != NULL)
-        {
-            Nodo* siguiente = actual->siguiente;
-            delete actual->info;
-            delete actual;
-            actual = siguiente;
-        }
+        Nodo* siguiente = lista->siguiente;
+        delete lista->info;
+        delete lista;
+        lista = siguiente;
     }
-    delete[] cubetas;
 }
-int HashLibros::h(long long isbn) { return isbn % cantidadCubetas; }
-bool HashLibros::estaVacia() { return cantidad == 0; }
-int HashLibros::getCantidad() { return cantidad; }
-bool HashLibros::existe(long long isbn)
+bool HashLibros::perteneceLista(Nodo* lista, long int isbn)
 {
-    if (isbn <= 0)
-        return false;
-    Nodo* actual = cubetas[h(isbn)];
-    while (actual != NULL && actual->info->getIsbn() != isbn)
-        actual = actual->siguiente;
-    return actual != NULL;
+    while (lista != NULL && lista->info->getId() != isbn)
+        lista = lista->siguiente;
+    return (lista != NULL);
 }
-Libro* HashLibros::buscar(long long isbn)
+void HashLibros::insFrontEnLista(Nodo*& lista, Libro* libro)
 {
-    Nodo* actual = cubetas[h(isbn)];
-    while (actual->info->getIsbn() != isbn)
-        actual = actual->siguiente;
-    return actual->info;
-}
-void HashLibros::insertar(Libro* libro)
-{
-    int cubeta = h(libro->getIsbn());
     Nodo* nuevo = new Nodo;
     nuevo->info = libro;
-    nuevo->siguiente = cubetas[cubeta];
-    cubetas[cubeta] = nuevo;
-    cantidad++;
+    nuevo->siguiente = lista;
+    lista = nuevo;
 }
-IteradorLibros* HashLibros::crearIterador()
+Libro* HashLibros::obtenerEnLista(Nodo* lista, long int isbn)
 {
-    IteradorLibros* iter = new IteradorLibros;
-    for (int i = 0; i < cantidadCubetas; i++)
+    while (lista->info->getId() != isbn)
+        lista = lista->siguiente;
+    return (lista->info);
+}
+void HashLibros::cargarIterador(Iterador& iter)
+{
+    for (int i = 0; i < CUBETAS_LIBROS; i++)
     {
-        Nodo* actual = cubetas[i];
+        Nodo *actual = cubetas[i];
         while (actual != NULL)
         {
-            iter->insertar(actual->info);
+            iter.insertar(actual->info);
             actual = actual->siguiente;
         }
     }
-    return iter;
 }

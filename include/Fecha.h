@@ -9,12 +9,7 @@ private:
     int anio;
 
 public:
-    Fecha();
-    // Guarda los componentes; comprobar esValida() antes de comparar.
     Fecha(int, int, int);
-    Fecha(const Fecha&);
-    Fecha operator=(const Fecha&);
-
     int getDia();
     int getMes();
     int getAnio();
@@ -23,14 +18,8 @@ public:
     bool esValida();
 
     // PRECONDICION:
-    // 1- Ambas fechas deben ser validas.
+    // 1- Ambas fechas son validas.
     bool operator<(Fecha);
-    // PRECONDICION:
-    // 1- Ambas fechas deben ser validas.
-    bool operator>(Fecha);
-    // PRECONDICION:
-    // 1- Ambas fechas deben ser validas.
-    bool operator==(Fecha);
 };
 
 #endif

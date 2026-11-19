@@ -1,12 +1,14 @@
-#include "IteradorAutores.h"
+#include "Iterador.h"
 #include <cstddef>
-IteradorAutores::IteradorAutores()
+
+Iterador::Iterador()
 {
     primero = NULL;
     ultimo = NULL;
     cursor = NULL;
 }
-IteradorAutores::~IteradorAutores()
+
+Iterador::~Iterador()
 {
     while (primero != NULL)
     {
@@ -15,7 +17,8 @@ IteradorAutores::~IteradorAutores()
         delete borrar;
     }
 }
-void IteradorAutores::insertar(Autor* elemento)
+
+void Iterador::insertar(Objeto* elemento)
 {
     Nodo* nuevo = new Nodo;
     nuevo->info = elemento;
@@ -29,7 +32,23 @@ void IteradorAutores::insertar(Autor* elemento)
         ultimo->siguiente = nuevo;
     ultimo = nuevo;
 }
-void IteradorAutores::reiniciar() { cursor = primero; }
-bool IteradorAutores::hayActual() { return cursor != NULL; }
-Autor* IteradorAutores::actual() { return cursor->info; }
-void IteradorAutores::avanzar() { cursor = cursor->siguiente; }
+
+void Iterador::reiniciar()
+{
+    cursor = primero;
+}
+
+bool Iterador::hayActual()
+{
+    return (cursor != NULL);
+}
+
+Objeto* Iterador::actual()
+{
+    return (cursor->info);
+}
+
+void Iterador::avanzar()
+{
+    cursor = cursor->siguiente;
+}

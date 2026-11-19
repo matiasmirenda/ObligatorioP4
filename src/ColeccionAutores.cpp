@@ -1,14 +1,36 @@
 #include "ColeccionAutores.h"
 
-// El miembro arbol se construye automaticamente antes del cuerpo.
-ColeccionAutores::ColeccionAutores() {}
+ColeccionAutores::ColeccionAutores()
+{
+}
 
-// El destructor del miembro arbol libera los objetos y nodos una sola vez.
-ColeccionAutores::~ColeccionAutores() {}
+// Al finalizar, C++ destruye tabla y esta libera sus objetos y nodos.
+ColeccionAutores::~ColeccionAutores()
+{
+}
 
-bool ColeccionAutores::estaVacia() { return arbol.estaVacia(); }
-int ColeccionAutores::getCantidad() { return arbol.getCantidad(); }
-bool ColeccionAutores::existe(long cedula) { return arbol.existe(cedula); }
-Autor* ColeccionAutores::buscar(long cedula) { return arbol.buscar(cedula); }
-void ColeccionAutores::insertar(Autor* autor) { arbol.insertar(autor); }
-IteradorAutores* ColeccionAutores::crearIterador() { return arbol.crearIterador(); }
+bool ColeccionAutores::estaVacia()
+{
+    return (tabla.estaVacia());
+}
+
+
+bool ColeccionAutores::existe(long int cedula)
+{
+    return (tabla.existe(cedula));
+}
+
+Autor* ColeccionAutores::buscar(long int cedula)
+{
+    return (tabla.buscar(cedula));
+}
+
+void ColeccionAutores::insertar(Autor* autor)
+{
+    tabla.insertar(autor);
+}
+
+void ColeccionAutores::cargarIterador(Iterador& iter)
+{
+    tabla.cargarIterador(iter);
+}

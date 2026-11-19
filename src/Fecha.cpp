@@ -1,12 +1,5 @@
 #include "Fecha.h"
 
-Fecha::Fecha()
-{
-    dia = 1;
-    mes = 1;
-    anio = 2000;
-}
-
 Fecha::Fecha(int d, int m, int a)
 {
     dia = d;
@@ -14,16 +7,9 @@ Fecha::Fecha(int d, int m, int a)
     anio = a;
 }
 
-Fecha::Fecha(const Fecha& otra)
-{
-    dia = otra.dia;
-    mes = otra.mes;
-    anio = otra.anio;
-}
-
-int Fecha::getDia() { return dia; }
-int Fecha::getMes() { return mes; }
-int Fecha::getAnio() { return anio; }
+int Fecha::getDia() { return (dia); }
+int Fecha::getMes() { return (mes); }
+int Fecha::getAnio() { return (anio); }
 
 bool Fecha::esValida()
 {
@@ -32,10 +18,19 @@ bool Fecha::esValida()
     {
         switch (mes)
         {
-        case 1: case 3: case 5: case 7: case 8: case 10: case 12:
+        case 1:
+        case 3:
+        case 5:
+        case 7:
+        case 8:
+        case 10:
+        case 12:
             valida = dia >= 1 && dia <= 31;
             break;
-        case 4: case 6: case 9: case 11:
+        case 4:
+        case 6:
+        case 9:
+        case 11:
             valida = dia >= 1 && dia <= 30;
             break;
         case 2:
@@ -48,32 +43,17 @@ bool Fecha::esValida()
             valida = false;
         }
     }
-    return valida;
+    return (valida);
 }
 
 bool Fecha::operator<(Fecha otra)
 {
+    bool menor;
     if (anio != otra.anio)
-        return anio < otra.anio;
-    if (mes != otra.mes)
-        return mes < otra.mes;
-    return dia < otra.dia;
-}
-
-bool Fecha::operator>(Fecha otra)
-{
-    return otra < *this;
-}
-
-bool Fecha::operator==(Fecha otra)
-{
-    return dia == otra.dia && mes == otra.mes && anio == otra.anio;
-}
-
-Fecha Fecha::operator=(const Fecha& otro)
-{
-    dia = otro.dia;
-    mes = otro.mes;
-    anio = otro.anio;
-    return *this;
+        menor = anio < otra.anio;
+    else if (mes != otra.mes)
+        menor = mes < otra.mes;
+    else
+        menor = dia < otra.dia;
+    return (menor);
 }
