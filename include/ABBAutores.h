@@ -1,22 +1,26 @@
 #ifndef ABBAUTORES_H
 #define ABBAUTORES_H
 #include "Autor.h"
-#include "IteradorAutores.h"
+#include "Iterador.h"
 class ABBAutores
 {
 private:
-    struct Nodo { Autor* info; Nodo* izquierdo; Nodo* derecho; };
+    struct Nodo
+    {
+        Autor* info; // El ABB es propietario del autor.
+        Nodo* izquierdo;
+        Nodo* derecho;
+    };
     Nodo* raiz;
-    int cantidad;
-    void destruirArbol(Nodo*);
-    void cargarIterador(Nodo*, IteradorAutores*);
-    ABBAutores(const ABBAutores&);
-    ABBAutores& operator=(const ABBAutores&);
+    void destruirArbol(Nodo*&);
+    // PRECONDICION:
+    // 1- El autor es valido y su clave no existe en el arbol.
+    void insertarEnArbol(Nodo*&, Autor*);
+    void cargarIterador(Nodo*, Iterador&);
 public:
     ABBAutores();
     ~ABBAutores();
     bool estaVacia();
-    int getCantidad();
     bool existe(long);
     // PRECONDICION:
     // 1- La clave existe en la coleccion.
@@ -26,7 +30,8 @@ public:
     // 2- No existe otro objeto con la misma clave.
     // 3- El llamador transfiere la propiedad del objeto a la estructura.
     void insertar(Autor*);
-    // El llamador elimina el iterador antes de destruir la coleccion.
-    IteradorAutores* crearIterador();
+    // PRECONDICION:
+    // 1- El iterador esta vacio y se utiliza mientras exista la coleccion.
+    void cargarIterador(Iterador&);
 };
 #endif

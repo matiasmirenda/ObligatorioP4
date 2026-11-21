@@ -5,23 +5,22 @@
 class Novela : public Libro
 {
 private:
-    String genero;
-    Autor* autor;
+    const string tipo;
+    string genero;
+    Autor *autor; // Referencia prestada al autor registrado; la novela no lo elimina.
+
 public:
-    Novela(long long, String, String, double, String);
-    Novela(const Novela&);
+    Novela(long int, string, string, double, string);
     ~Novela();
-    String getGenero();
-    Autor* getAutor();
-    // PRECONDICION:
-    // 1- El nuevo genero no esta vacio. Se usa "infantil" para el descuento.
-    void setGenero(String);
+    string getGenero();
+    Autor *getAutor();
+
     // PRECONDICION:
     // 1- El puntero refiere a un autor valido registrado en ColeccionAutores.
     // 2- El autor permanece vivo mientras la novela lo referencia.
-    void asignarAutor(Autor*);
+    void asignarAutor(Autor *);
     bool datosValidos();
     double calcularPrecioVenta();
-    String getTipo();
+    string getTipo();
 };
 #endif

@@ -31,5 +31,10 @@ jobs:
           CXX: g++
         run: sh scripts/test.sh --coverage
 
+      - name: Build application
+        run: |
+          mkdir -p build
+          g++ -std=c++11 -Wall -Wextra -pedantic -Iinclude src/*.cpp -o build/libreria
+
       - name: Enforce 90% line coverage for source files
         run: gcovr --root . --filter 'src/' --merge-lines --fail-under-line 90 build-coverage
