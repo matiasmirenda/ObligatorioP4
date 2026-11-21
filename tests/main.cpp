@@ -28,6 +28,8 @@ void verificar(bool condicion, const char* descripcion)
         std::cerr << "FALLO: " << descripcion << '\n';
         fallos++;
     }
+    else
+        std::cout << "OK: " << descripcion << '\n';
 }
 
 bool mismoImporte(double obtenido, double esperado)
@@ -160,7 +162,7 @@ void probarNovela()
         Novela infantil(1, "Cuentos", "Editorial", 100, "infantil");
         Novela comun(2, "Otra", "E", 100, "aventura");
         Libro* libro = &infantil;
-        verificar(libro->getTipo() == "Novela" && infantil.getGenero() == "infantil",
+        verificar(libro->getTipo() == NOVELA && infantil.getGenero() == "infantil",
                   "tipo y genero de novela");
         verificar(mismoImporte(libro->calcularPrecioVenta(), 80), "descuento infantil");
         verificar(mismoImporte(comun.calcularPrecioVenta(), 100), "novela comun sin descuento");
@@ -186,7 +188,7 @@ void probarTexto()
     verificar(mismoImporte(libro->calcularPrecioVenta(), 75), "texto anterior al corte tiene descuento");
     verificar(mismoImporte(corte.calcularPrecioVenta(), 100), "corte exacto sin descuento");
     verificar(mismoImporte(posterior.calcularPrecioVenta(), 100), "fecha posterior sin descuento");
-    verificar(libro->getTipo() == "Texto" && anterior.getMateria() == "Matematica",
+    verificar(libro->getTipo() == TEXTO && anterior.getMateria() == "Matematica",
               "tipo y materia de Texto");
     Fecha publicada = anterior.getFechaPublicado();
     verificar(publicada.getDia() == 31 && publicada.getMes() == 12 && publicada.getAnio() == 2025,
@@ -209,7 +211,7 @@ void probarEscolar()
         verificar(viejo.datosValidos() && viejo.getAnioEscuela() == anio, "anio escolar valido");
         verificar(mismoImporte(libro->calcularPrecioVenta(), esperadoViejo), "descuentos escolares acumulados");
         verificar(mismoImporte(nuevo.calcularPrecioVenta(), esperadoNuevo), "escolar desde corte");
-        verificar(libro->getTipo() == "Escolar", "tipo Escolar mediante Libro*");
+        verificar(libro->getTipo() == ESCOLAR, "tipo Escolar mediante Libro*");
     }
     verificar(!Escolar(1, "T", "E", 1, "M", Fecha(1, 1, 2000), 0).datosValidos(), "anio escolar cero");
     verificar(!Escolar(1, "T", "E", 1, "M", Fecha(1, 1, 2000), 7).datosValidos(), "anio escolar mayor a seis");
@@ -235,7 +237,7 @@ void probarIterador()
         verificar(iter.hayActual() && iter.actual() == &novela && iter.actual()->getId() == 20,
                   "Iterador unico acepta Libro como Objeto*");
         Libro* actualLibro = (Libro*) iter.actual();
-        verificar(actualLibro->getTipo() == "Novela", "cast con origen conocido a Libro*");
+        verificar(actualLibro->getTipo() == NOVELA, "cast con origen conocido a Libro*");
         iter.avanzar();
         verificar(!iter.hayActual(), "fin de recorrido no circular");
         iter.reiniciar();
@@ -486,37 +488,40 @@ void probarFachada()
     verificar(error == SIN_ERROR, "segundo autor fachada");
     fachada.registrarAutor(20, "Otro", "Nombre", error);
     verificar(error == AUTOR_YA_EXISTE, "autor duplicado");
-    fachada.registrarLibro(NULL, error);
-    verificar(error == DATOS_INVALIDOS, "libro nulo rechazado");
-    Libro* invalido = new Texto(99, "T", "E", 10, "M", Fecha(31, 2, 2026));
-    fachada.registrarLibro(invalido, error);
+    fachada.registrarLibro(TEXTO, 99, "T", "E", 10, "", "M", 31, 2, 2026, 0, error);
     verificar(error == DATOS_INVALIDOS, "fecha invalida no se registra");
-    delete invalido;
-    invalido = new Novela(99, "N", "E", std::numeric_limits<double>::infinity(), "aventura");
-    fachada.registrarLibro(invalido, error);
+    fachada.registrarLibro(NOVELA, 99, "N", "E", std::numeric_limits<double>::infinity(), "aventura", "", 0, 0, 0, 0, error);
     verificar(error == DATOS_INVALIDOS, "precio infinito rechazado");
-    delete invalido;
-    invalido = new Novela(99, "N", "E", 10, "aventura");
-    invalido->registrarVenta();
-    fachada.registrarLibro(invalido, error);
-    verificar(error == DATOS_INVALIDOS, "alta requiere cero ventas");
-    delete invalido;
-    Libro* infantil = new Novela(1, "El bosque", "E", 100, "infantil");
-    Libro* texto = new Texto(2, "El texto", "E", 200, "M", Fecha(31, 12, 2025));
-    Libro* escolar = new Escolar(3, "Escuela", "E", 100, "M", Fecha(1, 1, 2026), 2);
-    Libro* otra = new Novela(4, "Otra", "Otra editorial", 500, "aventura");
-    Libro* altas[4] = {infantil, texto, escolar, otra};
-    for (int i = 0; i < 4; i++)
-    {
-        fachada.registrarLibro(altas[i], error);
-        verificar(error == SIN_ERROR && altas[i]->getUnidadesVendidas() == 0, "alta libro fachada");
-    }
-    Libro* repetido = new Novela(1, "Duplicado", "E", 10, "aventura");
-    fachada.registrarLibro(repetido, error);
-    verificar(error == LIBRO_YA_EXISTE, "libro duplicado sigue siendo del llamador");
-    delete repetido;
+    fachada.registrarLibro(ESCOLAR, 99, "N", "E", 10, "", "M", 1, 1, 2026, 7, error);
+    verificar(error == DATOS_INVALIDOS, "anio escolar invalido rechazado");
+    fachada.registrarLibro(NOVELA, 99, "N", "E", 10, "", "", 0, 0, 0, 0, error);
+    verificar(error == DATOS_INVALIDOS, "genero vacio rechazado");
+    fachada.consultarLibro(99, resultado, error);
+    verificar(error == LIBRO_NO_EXISTE, "altas invalidas no registran el libro");
+    fachada.registrarLibro(NOVELA, 1, "El bosque", "E", 100, "infantil", "", 0, 0, 0, 0, error);
+    verificar(error == SIN_ERROR, "alta novela fachada");
+    fachada.registrarLibro(TEXTO, 2, "El texto", "E", 200, "", "M", 31, 12, 2025, 0, error);
+    verificar(error == SIN_ERROR, "alta texto fachada");
+    fachada.registrarLibro(ESCOLAR, 3, "Escuela", "E", 100, "", "M", 1, 1, 2026, 2, error);
+    verificar(error == SIN_ERROR, "alta escolar fachada");
+    fachada.registrarLibro(NOVELA, 4, "Otra", "Otra editorial", 500, "aventura", "", 0, 0, 0, 0, error);
+    verificar(error == SIN_ERROR, "alta novela de otra editorial");
+    Libro* infantil;
+    Libro* texto;
+    Libro* escolar;
+    fachada.consultarLibro(1, infantil, error);
+    fachada.consultarLibro(2, texto, error);
+    fachada.consultarLibro(3, escolar, error);
+    verificar(infantil->getTipo() == NOVELA && texto->getTipo() == TEXTO && escolar->getTipo() == ESCOLAR,
+              "la fachada crea el tipo de libro indicado");
+    verificar(infantil->getUnidadesVendidas() == 0 && texto->getUnidadesVendidas() == 0
+              && escolar->getUnidadesVendidas() == 0, "alta inicia con cero ventas");
+    verificar(((Escolar*) escolar)->getAnioEscuela() == 2 && ((Texto*) texto)->getFechaPublicado().getAnio() == 2025,
+              "la fachada arma fecha y anio escolar");
+    fachada.registrarLibro(NOVELA, 1, "Duplicado", "E", 10, "aventura", "", 0, 0, 0, 0, error);
+    verificar(error == LIBRO_YA_EXISTE, "libro duplicado rechazado");
     fachada.consultarLibro(1, resultado, error);
-    verificar(error == SIN_ERROR && resultado == infantil, "consulta referencia original");
+    verificar(error == SIN_ERROR && resultado == infantil && infantil->getTitulo() == "El bosque", "duplicado no reemplaza al original");
     fachada.asociarAutor(2, 20, error);
     verificar(error == LIBRO_NO_ES_NOVELA, "no convertir texto a novela");
     fachada.asociarAutor(1, 99, error);
@@ -619,50 +624,38 @@ void probarMenu()
     verificar(salida.find("Unidades vendidas: novelas 2, textos comunes 1, escolares 1") != string::npos, "salida del menu");
     verificar(salida.find("Unidades vendidas: 2") != string::npos, "salida del menu");
     verificar(salida.find("10 | Luis | Lopez") < salida.find("20 | Ana Maria | Perez"), "menu muestra autores ordenados");
-    salida = probarEntradaMenu("abc\n11\n1\n0\n99999999999999999999999999999\n1x\n1\n   \nAna\nPerez\n2\n2\n2\nTexto\nE\n-1\nnan\n10x\n10\nM\n31\n2\n2026\n28\n2\n2026\n5\n2\n0\n");
-    verificar(salida.find("Ingrese un entero") != string::npos, "salida del menu");
-    verificar(salida.find("Ingrese un texto no vacio.") != string::npos, "salida del menu");
-    verificar(salida.find("Ingrese un precio no negativo") != string::npos, "salida del menu");
-    verificar(salida.find("La fecha no existe.") != string::npos, "salida del menu");
-    verificar(salida.find("Publicacion: 28/2/2026") != string::npos, "salida del menu");
-    probarEntradaMenu("9\n1..2\n.50\n9\n 12.25 \n0\n");
-    probarEntradaMenu("");
-    probarEntradaMenu("1\n");
-    probarEntradaMenu("2\n1\n1\nTitulo\n");
-    probarEntradaMenu("2\n3\n1\nT\nE\n1\nM\n1\n1\n2026\n");
+    string largo(101, 'A');
+    salida = probarEntradaMenu("abc\n11\n1\n0\n1234567890\n1x\n1\n\n" + largo + "\nAna\nPerez\n"
+                               "2\n2\n2\nTexto\nE\n-1\nnan\n10x\n10\nM\n31\n2\n2026\n"
+                               "2\n2\n2\nTexto\nE\n10\nM\n28\n2\n2026\n5\n2\n0\n");
+    verificar(salida.find("Ingrese un entero entre 0 y 10") != string::npos, "menu rechaza opcion invalida");
+    verificar(salida.find("Ingrese un entero entre 1 y 999999999") != string::npos, "menu rechaza cedula de 10 digitos");
+    verificar(salida.find("Ingrese un texto de 1 a 100 caracteres") != string::npos, "menu rechaza texto vacio o largo");
+    verificar(salida.find("Ingrese un precio valido") != string::npos, "menu rechaza precio invalido");
+    verificar(salida.find("Los datos ingresados no son validos.") != string::npos, "fachada rechaza fecha inexistente");
+    verificar(salida.find("Publicacion: 28/2/2026") != string::npos, "alta valida despues de los errores");
+    salida = probarEntradaMenu("9\n1..2\n.50\n9\n12.25\n0\n");
+    verificar(salida.find("Ingrese un precio valido") != string::npos, "precio con dos puntos rechazado");
+    verificar(salida.find("Unidades vendidas: novelas 0, textos comunes 0, escolares 0") != string::npos,
+              "precio decimal aceptado");
 }
 
 int main()
 {
-    std::cout << "Probando Menu...\n";
     probarMenu();
-    std::cout << "Probando Fachada...\n";
     probarFachada();
-    std::cout << "Probando MensajesError...\n";
     probarMensajesError();
-    std::cout << "Probando Objeto...\n";
     probarObjeto();
-    std::cout << "Probando Fecha...\n";
     probarFecha();
-    std::cout << "Probando Autor...\n";
     probarAutor();
-    std::cout << "Probando Libro...\n";
     probarLibro();
-    std::cout << "Probando Novela...\n";
     probarNovela();
-    std::cout << "Probando Texto...\n";
     probarTexto();
-    std::cout << "Probando Escolar...\n";
     probarEscolar();
-    std::cout << "Probando Iterador...\n";
     probarIterador();
-    std::cout << "Probando HashLibros...\n";
     probarHashLibros();
-    std::cout << "Probando ABBAutores...\n";
     probarABBAutores();
-    std::cout << "Probando ColeccionLibros...\n";
     probarColeccionLibros();
-    std::cout << "Probando ColeccionAutores...\n";
     probarColeccionAutores();
     int resultado = 0;
     if (fallos != 0)
