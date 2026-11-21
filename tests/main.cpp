@@ -121,9 +121,9 @@ void probarAutor()
 
 void probarLibro()
 {
-    Novela novela(1234567890123L, "El camino", "Editorial", 100, "aventura");
+    Novela novela(2147483647L, "El camino", "Editorial", 100, "aventura");
     Libro* libro = &novela;
-    verificar(libro->getId() == 1234567890123L, "ISBN como identificador de Libro");
+    verificar(libro->getId() == 2147483647L, "ISBN maximo documentado (2147483647) como identificador de Libro");
     verificar(libro->getTitulo() == "El camino" && libro->getEditorial() == "Editorial",
               "datos comunes del libro");
     verificar(libro->getPrecioBase() == 100 && libro->getUnidadesVendidas() == 0,
@@ -634,20 +634,35 @@ void probarMenu()
 
 int main()
 {
+    std::cout << "Probando Menu...\n";
     probarMenu();
+    std::cout << "Probando Fachada...\n";
     probarFachada();
+    std::cout << "Probando MensajesError...\n";
     probarMensajesError();
+    std::cout << "Probando Objeto...\n";
     probarObjeto();
+    std::cout << "Probando Fecha...\n";
     probarFecha();
+    std::cout << "Probando Autor...\n";
     probarAutor();
+    std::cout << "Probando Libro...\n";
     probarLibro();
+    std::cout << "Probando Novela...\n";
     probarNovela();
+    std::cout << "Probando Texto...\n";
     probarTexto();
+    std::cout << "Probando Escolar...\n";
     probarEscolar();
+    std::cout << "Probando Iterador...\n";
     probarIterador();
+    std::cout << "Probando HashLibros...\n";
     probarHashLibros();
+    std::cout << "Probando ABBAutores...\n";
     probarABBAutores();
+    std::cout << "Probando ColeccionLibros...\n";
     probarColeccionLibros();
+    std::cout << "Probando ColeccionAutores...\n";
     probarColeccionAutores();
     int resultado = 0;
     if (fallos != 0)

@@ -5,7 +5,6 @@
 class Novela : public Libro
 {
 private:
-    const string tipo;
     string genero;
     Autor *autor; // Referencia prestada al autor registrado; la novela no lo elimina.
 
@@ -21,6 +20,6 @@ public:
     void asignarAutor(Autor *);
     bool datosValidos();
     double calcularPrecioVenta();
-    string getTipo();
+    TipoLibro getTipo();
 };
 #endif

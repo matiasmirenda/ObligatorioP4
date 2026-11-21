@@ -4,7 +4,6 @@
 class Escolar : public Texto
 {
 private:
-    const string tipo;
     int anioEscuela;
 
 public:
@@ -13,6 +12,6 @@ public:
     int getAnioEscuela();
     bool datosValidos();
     double calcularPrecioVenta();
-    string getTipo();
+    TipoLibro getTipo();
 };
 #endif

@@ -1,7 +1,7 @@
 #include "Texto.h"
 
 Texto::Texto(long int cod, string tit, string ed, double precio, string mat, Fecha fecha)
-    : Libro(cod, tit, ed, precio), tipo("Texto"), materia(mat), fechaPublicado(fecha) {}
+    : Libro(cod, tit, ed, precio), materia(mat), fechaPublicado(fecha) {}
 string Texto::getMateria() { return (materia); }
 Fecha Texto::getFechaPublicado() { return (fechaPublicado); }
 bool Texto::datosValidos()
@@ -16,7 +16,7 @@ double Texto::calcularPrecioVenta()
         precio = precio * 0.75;
     return (precio);
 }
-string Texto::getTipo() { return (tipo); }
+TipoLibro Texto::getTipo() { return (TEXTO); }
 
 Texto::~Texto()
 {

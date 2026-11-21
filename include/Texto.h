@@ -5,7 +5,6 @@
 class Texto : public Libro
 {
 private:
-    const string tipo;
     string materia;
     Fecha fechaPublicado; // Valor propio del texto, sin new ni delete.
 
@@ -16,6 +15,6 @@ public:
     Fecha getFechaPublicado();
     bool datosValidos();
     double calcularPrecioVenta();
-    string getTipo();
+    TipoLibro getTipo();
 };
 #endif

@@ -1,7 +1,7 @@
 #include "Escolar.h"
 Escolar::Escolar(long int cod, string tit, string ed, double precio,
                  string mat, Fecha fecha, int anio)
-    : Texto(cod, tit, ed, precio, mat, fecha), tipo("Escolar")
+    : Texto(cod, tit, ed, precio, mat, fecha)
 {
     anioEscuela = anio;
 }
@@ -18,7 +18,7 @@ double Escolar::calcularPrecioVenta()
         precio = precio * 0.90;
     return (precio);
 }
-string Escolar::getTipo() { return (tipo); }
+TipoLibro Escolar::getTipo() { return (ESCOLAR); }
 
 Escolar::~Escolar()
 {

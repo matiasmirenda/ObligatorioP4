@@ -3,6 +3,7 @@
 
 #include <string>
 #include "Objeto.h"
+#include "TipoLibro.h"
 using std::string;
 
 class Libro : public Objeto
@@ -32,6 +33,6 @@ public:
     // PRECONDICION:
     // 1- Los datos del libro son validos.
     virtual double calcularPrecioVenta() = 0;
-    virtual string getTipo() = 0;
+    virtual TipoLibro getTipo() = 0;
 };
 #endif

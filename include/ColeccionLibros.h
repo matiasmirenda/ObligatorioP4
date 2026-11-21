@@ -1,8 +1,11 @@
 #ifndef COLECCION_LIBROS_H
 #define COLECCION_LIBROS_H
 
+#include <string>
 #include "HashLibros.h"
 #include "Iterador.h"
+
+using std::string;
 
 class ColeccionLibros
 {
@@ -30,6 +33,18 @@ public:
     // PRECONDICION:
     // 1- El iterador esta vacio y se utiliza mientras exista la coleccion.
     void cargarIterador(Iterador&);
+
+    // PRECONDICION:
+    // 1- El iterador esta vacio y se utiliza mientras exista la coleccion.
+    void cargarPorPrefijo(string, Iterador&);
+
+    bool existeEditorial(string);
+    double calcularRecaudacion(string);
+    void contarVentasPorTipo(double, long int&, long int&, long int&);
+
+    // PRECONDICION:
+    // 1- Existe al menos un libro de la editorial.
+    Libro* masVendido(string);
 };
 
 #endif

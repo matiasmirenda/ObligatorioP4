@@ -2,7 +2,7 @@
 #include <cstddef>
 
 Novela::Novela(long int cod, string tit, string ed, double precio, string gen)
-    : Libro(cod, tit, ed, precio), tipo("Novela"), genero(gen)
+    : Libro(cod, tit, ed, precio), genero(gen)
 {
     autor = NULL;
 }
@@ -17,7 +17,7 @@ double Novela::calcularPrecioVenta()
         precio = precio * 0.80;
     return (precio);
 }
-string Novela::getTipo() { return (tipo); }
+TipoLibro Novela::getTipo() { return (NOVELA); }
 
 Novela::~Novela()
 {

@@ -6,6 +6,7 @@
 #include "ColeccionLibros.h"
 #include "Iterador.h"
 #include "TipoError.h"
+#include "TipoLibro.h"
 
 using std::string;
 
@@ -19,8 +20,9 @@ public:
     Fachada();
     ~Fachada();
     void registrarAutor(long int, string, string, TipoError&);
-    // Si falla, el llamador conserva la propiedad del libro.
-    void registrarLibro(Libro*, TipoError&);
+    // Recibe todos los datos; segun el tipo usa genero, o materia y fecha, o ademas el anio escolar.
+    void registrarLibro(TipoLibro, long int, string, string, double, string, string,
+                        int, int, int, int, TipoError&);
     void asociarAutor(long int, long int, TipoError&);
     // PRECONDICION:
     // 1- El iterador esta vacio y se usa mientras exista la Fachada.

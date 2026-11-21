@@ -1,5 +1,7 @@
 #include "Fachada.h"
 #include "Novela.h"
+#include "Texto.h"
+#include "Escolar.h"
 #include <cstddef>
 #include <climits>
 
@@ -17,13 +19,28 @@ void Fachada::registrarAutor(long int cedula, string nombre, string apellido, Ti
         autores.insertar(new Autor(cedula, nombre, apellido));
 }
 
-void Fachada::registrarLibro(Libro* libro, TipoError& error)
+void Fachada::registrarLibro(TipoLibro tipo, long int isbn, string titulo, string editorial, double precioBase,
+                             string genero, string materia, int dia, int mes, int anio, int anioEscuela,
+                             TipoError& error)
 {
     error = SIN_ERROR;
-    if (libro == NULL || !libro->datosValidos() || libro->getUnidadesVendidas() != 0)
+    Libro* libro;
+    if (tipo == NOVELA)
+        libro = new Novela(isbn, titulo, editorial, precioBase, genero);
+    else if (tipo == TEXTO)
+        libro = new Texto(isbn, titulo, editorial, precioBase, materia, Fecha(dia, mes, anio));
+    else
+        libro = new Escolar(isbn, titulo, editorial, precioBase, materia, Fecha(dia, mes, anio), anioEscuela);
+    if (!libro->datosValidos())
+    {
         error = DATOS_INVALIDOS;
-    else if (libros.existe(libro->getId()))
+        delete libro;
+    }
+    else if (libros.existe(isbn))
+    {
         error = LIBRO_YA_EXISTE;
+        delete libro;
+    }
     else
         libros.insertar(libro);
 }
@@ -36,7 +53,7 @@ void Fachada::asociarAutor(long int isbn, long int cedula, TipoError& error)
     else
     {
         Libro* libro = libros.buscar(isbn);
-        if (libro->getTipo() != "Novela")
+        if (libro->getTipo() != NOVELA)
             error = LIBRO_NO_ES_NOVELA;
         else if (!autores.existe(cedula))
             error = AUTOR_NO_EXISTE;
@@ -51,15 +68,7 @@ void Fachada::asociarAutor(long int isbn, long int cedula, TipoError& error)
 void Fachada::listarPorPrefijo(string frase, Iterador& resultado, TipoError& error)
 {
     error = SIN_ERROR;
-    Iterador recorrido;
-    libros.cargarIterador(recorrido);
-    while (recorrido.hayActual())
-    {
-        Libro* libro = (Libro*) recorrido.actual();
-        if (libro->comienzaCon(frase))
-            resultado.insertar(libro);
-        recorrido.avanzar();
-    }
+    libros.cargarPorPrefijo(frase, resultado);
     if (!resultado.hayActual())
         error = SIN_COINCIDENCIAS;
 }
@@ -104,58 +113,20 @@ void Fachada::registrarVenta(long int isbn, double& importe, TipoError& error)
 
 double Fachada::calcularRecaudacion(string editorial)
 {
-    double total = 0;
-    Iterador recorrido;
-    libros.cargarIterador(recorrido);
-    while (recorrido.hayActual())
-    {
-        Libro* libro = (Libro*) recorrido.actual();
-        if (libro->getEditorial() == editorial)
-            total += libro->getUnidadesVendidas() * libro->calcularPrecioVenta();
-        recorrido.avanzar();
-    }
-    return (total);
+    return (libros.calcularRecaudacion(editorial));
 }
 
 void Fachada::contarVentasPorTipo(double precio, long int& novelas, long int& textos, long int& escolares)
 {
-    novelas = 0;
-    textos = 0;
-    escolares = 0;
-    Iterador recorrido;
-    libros.cargarIterador(recorrido);
-    while (recorrido.hayActual())
-    {
-        Libro* libro = (Libro*) recorrido.actual();
-        if (libro->getPrecioBase() > precio)
-        {
-            if (libro->getTipo() == "Novela")
-                novelas += libro->getUnidadesVendidas();
-            else if (libro->getTipo() == "Texto")
-                textos += libro->getUnidadesVendidas();
-            else
-                escolares += libro->getUnidadesVendidas();
-        }
-        recorrido.avanzar();
-    }
+    libros.contarVentasPorTipo(precio, novelas, textos, escolares);
 }
 
 void Fachada::consultarMasVendido(string editorial, Libro*& resultado, TipoError& error)
 {
     error = SIN_ERROR;
     resultado = NULL;
-    Iterador recorrido;
-    libros.cargarIterador(recorrido);
-    while (recorrido.hayActual())
-    {
-        Libro* libro = (Libro*) recorrido.actual();
-        if (libro->getEditorial() == editorial)
-        {
-            if (resultado == NULL || libro->getUnidadesVendidas() > resultado->getUnidadesVendidas())
-                resultado = libro;
-        }
-        recorrido.avanzar();
-    }
-    if (resultado == NULL)
+    if (!libros.existeEditorial(editorial))
         error = SIN_LIBROS_DE_EDITORIAL;
+    else
+        resultado = libros.masVendido(editorial);
 }
