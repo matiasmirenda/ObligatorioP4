@@ -430,69 +430,15 @@ classDiagram
 
 ## 6. Diagrama de módulos
 
-A → B significa que **B incluye A**. Los módulos se ordenan de arriba hacia abajo.
-Cada nodo reúne el .h y el .cpp del mismo módulo; las etiquetas indican en cuál
-archivo se encuentra el include. Se muestran los encabezados propios del proyecto.
+Cada módulo muestra el par **.h / .cpp**. Las flechas representan dependencias a
+través del encabezado: **A → B significa que B incluye A.h**. El recorrido va
+de arriba hacia abajo y termina en main.cpp, que no tiene encabezado.
+Los recuadros verdes son los encabezados compartidos de tipos y constantes,
+que no tienen un .cpp asociado.
 
-```mermaid
-flowchart TD
-    ABBAutores["ABBAutores"]
-    Autor["Autor"]
-    ColeccionAutores["ColeccionAutores"]
-    ColeccionLibros["ColeccionLibros"]
-    Escolar["Escolar"]
-    Fachada["Fachada"]
-    Fecha["Fecha"]
-    HashLibros["HashLibros"]
-    Iterador["Iterador"]
-    Libro["Libro"]
-    MensajesError["MensajesError"]
-    Menu["Menu"]
-    Novela["Novela"]
-    Objeto["Objeto"]
-    Parametros["Parametros"]
-    Texto["Texto"]
-    TipoError["TipoError"]
-    TipoLibro["TipoLibro"]
-    ValidacionDatos["ValidacionDatos"]
-    main["main"]
-    ABBAutores -->|".h"| ColeccionAutores
-    Autor -->|".h"| ABBAutores
-    Autor -->|".h"| Novela
-    ColeccionAutores -->|".h"| Fachada
-    ColeccionLibros -->|".h"| Fachada
-    Escolar -->|".cpp"| Fachada
-    Fachada -->|".cpp"| Menu
-    Fecha -->|".cpp"| Menu
-    Fecha -->|".h"| Texto
-    HashLibros -->|".h"| ColeccionLibros
-    Iterador -->|".h"| ABBAutores
-    Iterador -->|".h"| HashLibros
-    Libro -->|".h"| HashLibros
-    Libro -->|".h"| Novela
-    Libro -->|".h"| Texto
-    MensajesError -->|".cpp"| Menu
-    Menu -->|".cpp"| main
-    Novela -->|".cpp"| Fachada
-    Objeto -->|".h"| Autor
-    Objeto -->|".h"| Iterador
-    Objeto -->|".h"| Libro
-    Parametros -->|".cpp"| Escolar
-    Parametros -->|".cpp"| Fecha
-    Parametros -->|".cpp"| Menu
-    Parametros -->|".cpp"| Novela
-    Parametros -->|".cpp"| Texto
-    Parametros -->|".cpp"| ValidacionDatos
-    Texto -->|".h"| Escolar
-    TipoError -->|".h"| Fachada
-    TipoError -->|".h"| MensajesError
-    TipoLibro -->|".h"| Libro
-    ValidacionDatos -->|".cpp"| Libro
-    ValidacionDatos -->|".cpp"| Menu
-    ValidacionDatos -->|".cpp"| Novela
-    ValidacionDatos -->|".cpp"| Texto
-```
+![Diagrama de módulos](docs/diagramas/modulos.png)
 
-Un include en un .h llega indirectamente a quienes incluyen ese encabezado. Un
-include que está solo en un .cpp no se transmite a otros módulos. Por eso, las
-flechas con etiqueta .cpp no justifican quitar un include de otro archivo.
+[Versión vectorial del diagrama](docs/diagramas/modulos.svg)
+
+Para quitar un include se revisa el archivo donde está declarado: un include
+que está únicamente en un .cpp no se transmite a los demás módulos.
