@@ -1,5 +1,4 @@
 #include "ABBAutores.h"
-#include <cstddef>
 ABBAutores::ABBAutores()
 {
     raiz = NULL;

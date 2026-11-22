@@ -6,7 +6,8 @@
 
 using std::string;
 
-// Traduce el resultado de la logica para mostrarlo en la presentacion.
 string mensajeError(TipoError);
+
+void mostrarResultado(TipoError);
 
 #endif

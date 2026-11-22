@@ -7,11 +7,13 @@ private:
     int anioEscuela;
 
 public:
-    Escolar(long int, string, string, double, string, Fecha, int);
+    void imprimir();
+    Escolar(long int, string, string, float, string, Fecha, int);
     ~Escolar();
     int getAnioEscuela();
     bool datosValidos();
-    double calcularPrecioVenta();
+    // Aplica el descuento de Texto y el adicional de primero a tercero.
+    float calcularPrecioVenta();
     TipoLibro getTipo();
 };
 #endif

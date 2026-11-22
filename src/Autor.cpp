@@ -1,4 +1,7 @@
+#include <iostream>
 #include "Autor.h"
+
+using namespace std;
 
 Autor::Autor(long int ci, string nom, string ape)
     : nombre(nom), apellido(ape)
@@ -23,4 +26,9 @@ string Autor::getApellido()
 
 Autor::~Autor()
 {
+}
+
+void Autor::imprimir()
+{
+    cout << cedula << " | " << nombre << " | " << apellido << '\n';
 }

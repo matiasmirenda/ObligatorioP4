@@ -14,6 +14,7 @@ private:
     string apellido;
 
 public:
+    void imprimir();
     Autor(long int, string, string);
     ~Autor();
 

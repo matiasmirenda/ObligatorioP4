@@ -1,5 +1,9 @@
+#include <iostream>
+#include "Parametros.h"
 #include "Escolar.h"
-Escolar::Escolar(long int cod, string tit, string ed, double precio,
+
+using namespace std;
+Escolar::Escolar(long int cod, string tit, string ed, float precio,
                  string mat, Fecha fecha, int anio)
     : Texto(cod, tit, ed, precio, mat, fecha)
 {
@@ -9,17 +13,23 @@ Escolar::Escolar(long int cod, string tit, string ed, double precio,
 int Escolar::getAnioEscuela() { return (anioEscuela); }
 bool Escolar::datosValidos()
 {
-    return (Texto::datosValidos() && anioEscuela >= 1 && anioEscuela <= 6);
+    return (Texto::datosValidos() && anioEscuela >= ANIO_ESCOLAR_MINIMO && anioEscuela <= ANIO_ESCOLAR_MAXIMO);
 }
-double Escolar::calcularPrecioVenta()
+float Escolar::calcularPrecioVenta()
 {
-    double precio = Texto::calcularPrecioVenta();
-    if (anioEscuela >= 1 && anioEscuela <= 3)
-        precio = precio * 0.90;
+    float precio = Texto::calcularPrecioVenta();
+    if (anioEscuela >= ANIO_ESCOLAR_MINIMO && anioEscuela <= ULTIMO_ANIO_DESCUENTO_ESCOLAR)
+        precio = precio * FACTOR_PRECIO_ESCOLAR_INICIAL;
     return (precio);
 }
 TipoLibro Escolar::getTipo() { return (ESCOLAR); }
 
 Escolar::~Escolar()
 {
+}
+
+void Escolar::imprimir()
+{
+    Texto::imprimir();
+    cout << "Anio escolar: " << anioEscuela << '\n';
 }

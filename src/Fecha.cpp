@@ -1,4 +1,8 @@
+#include <iostream>
+#include "Parametros.h"
 #include "Fecha.h"
+
+using namespace std;
 
 Fecha::Fecha(int d, int m, int a)
 {
@@ -14,30 +18,30 @@ int Fecha::getAnio() { return (anio); }
 bool Fecha::esValida()
 {
     bool valida = false;
-    if (anio >= 1900 && anio <= 2099)
+    if (anio >= ANIO_PUBLICACION_MINIMO && anio <= ANIO_PUBLICACION_MAXIMO)
     {
         switch (mes)
         {
-        case 1:
-        case 3:
-        case 5:
-        case 7:
-        case 8:
-        case 10:
-        case 12:
-            valida = dia >= 1 && dia <= 31;
+        case ENERO:
+        case MARZO:
+        case MAYO:
+        case JULIO:
+        case AGOSTO:
+        case OCTUBRE:
+        case DICIEMBRE:
+            valida = dia >= PRIMER_DIA_MES && dia <= DIAS_MES_LARGO;
             break;
-        case 4:
-        case 6:
-        case 9:
-        case 11:
-            valida = dia >= 1 && dia <= 30;
+        case ABRIL:
+        case JUNIO:
+        case SEPTIEMBRE:
+        case NOVIEMBRE:
+            valida = dia >= PRIMER_DIA_MES && dia <= DIAS_MES_CORTO;
             break;
-        case 2:
-            if (anio % 400 == 0 || (anio % 4 == 0 && anio % 100 != 0))
-                valida = dia >= 1 && dia <= 29;
+        case FEBRERO:
+            if (anio % CICLO_SIGLO_BISIESTO == 0 || (anio % CICLO_BISIESTO == 0 && anio % ANIOS_POR_SIGLO != 0))
+                valida = dia >= PRIMER_DIA_MES && dia <= DIAS_FEBRERO_BISIESTO;
             else
-                valida = dia >= 1 && dia <= 28;
+                valida = dia >= PRIMER_DIA_MES && dia <= DIAS_FEBRERO_COMUN;
             break;
         default:
             valida = false;
@@ -56,4 +60,9 @@ bool Fecha::operator<(Fecha otra)
     else
         menor = dia < otra.dia;
     return (menor);
+}
+
+void Fecha::imprimir()
+{
+    cout << dia << '/' << mes << '/' << anio;
 }

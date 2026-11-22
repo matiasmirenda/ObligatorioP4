@@ -6,9 +6,11 @@
 class Iterador
 {
 private:
+    Iterador(const Iterador&);
+    Iterador& operator=(const Iterador&);
     struct Nodo
     {
-        Objeto* info; // Referencia prestada: el iterador no elimina el objeto.
+        Objeto* info;
         Nodo* siguiente;
     };
     Nodo* primero;
@@ -19,6 +21,7 @@ public:
     Iterador();
     ~Iterador();
 
+    // Agrega una referencia prestada al final sin adquirir la propiedad del objeto.
     // PRECONDICION:
     // 1- El puntero no es NULL y el objeto vive durante todo el recorrido.
     // 2- Los elementos se cargan antes de comenzar el recorrido.

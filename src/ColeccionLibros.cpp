@@ -1,11 +1,12 @@
+#include <iostream>
 #include "ColeccionLibros.h"
-#include <cstddef>
+
+using namespace std;
 
 ColeccionLibros::ColeccionLibros()
 {
 }
 
-// Al finalizar, C++ destruye tabla y esta libera sus objetos y nodos.
 ColeccionLibros::~ColeccionLibros()
 {
 }
@@ -64,9 +65,9 @@ bool ColeccionLibros::existeEditorial(string editorial)
     return (encontrado);
 }
 
-double ColeccionLibros::calcularRecaudacion(string editorial)
+float ColeccionLibros::calcularRecaudacion(string editorial)
 {
-    double total = 0;
+    float total = 0;
     Iterador recorrido;
     tabla.cargarIterador(recorrido);
     while (recorrido.hayActual())
@@ -79,7 +80,7 @@ double ColeccionLibros::calcularRecaudacion(string editorial)
     return (total);
 }
 
-void ColeccionLibros::contarVentasPorTipo(double precio, long int& novelas, long int& textos, long int& escolares)
+void ColeccionLibros::contarVentasPorTipo(float precio, long int& novelas, long int& textos, long int& escolares)
 {
     novelas = 0;
     textos = 0;
@@ -118,4 +119,17 @@ Libro* ColeccionLibros::masVendido(string editorial)
         recorrido.avanzar();
     }
     return (mayor);
+}
+
+void ColeccionLibros::imprimirRecaudacion(string editorial)
+{
+    cout << "Recaudacion: " << calcularRecaudacion(editorial) << '\n';
+}
+
+void ColeccionLibros::imprimirVentasPorTipo(float precio)
+{
+    long int novelas, textos, escolares;
+    contarVentasPorTipo(precio, novelas, textos, escolares);
+    cout << "Unidades vendidas: novelas " << novelas << ", textos comunes " << textos
+              << ", escolares " << escolares << '\n';
 }

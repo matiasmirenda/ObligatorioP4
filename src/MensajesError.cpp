@@ -1,4 +1,7 @@
+#include <iostream>
 #include "MensajesError.h"
+
+using namespace std;
 
 string mensajeError(TipoError error)
 {
@@ -7,9 +10,6 @@ string mensajeError(TipoError error)
     {
         case DATOS_INVALIDOS:
             mensaje = "Los datos ingresados no son validos.";
-            break;
-        case LIMITE_VENTAS:
-            mensaje = "No se pueden registrar mas ventas para este libro.";
             break;
         case SIN_ERROR:
             mensaje = "Sin error.";
@@ -43,4 +43,12 @@ string mensajeError(TipoError error)
             break;
     }
     return (mensaje);
+}
+
+void mostrarResultado(TipoError error)
+{
+    if (error == SIN_ERROR)
+        cout << "Operacion realizada." << '\n';
+    else
+        cout << mensajeError(error) << '\n';
 }

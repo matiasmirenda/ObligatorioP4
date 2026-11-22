@@ -4,7 +4,6 @@ ColeccionAutores::ColeccionAutores()
 {
 }
 
-// Al finalizar, C++ destruye tabla y esta libera sus objetos y nodos.
 ColeccionAutores::~ColeccionAutores()
 {
 }
