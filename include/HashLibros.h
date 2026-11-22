@@ -8,8 +8,6 @@ const int CUBETAS_LIBROS = 500;
 class HashLibros
 {
 private:
-    HashLibros(const HashLibros&);
-    HashLibros& operator=(const HashLibros&);
     struct Nodo
     {
         Libro *info;

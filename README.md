@@ -307,8 +307,6 @@ classDiagram
         +imprimir() void
     }
     class ColeccionLibros {
-        -ColeccionLibros(const ColeccionLibros&)
-        -operator=(const ColeccionLibros&) ColeccionLibros&
         <<diccionario>>
         -tabla: HashLibros
         +ColeccionLibros()
@@ -327,8 +325,6 @@ classDiagram
         +imprimirVentasPorTipo(float) void
     }
     class ColeccionAutores {
-        -ColeccionAutores(const ColeccionAutores&)
-        -operator=(const ColeccionAutores&) ColeccionAutores&
         <<diccionario>>
         -tabla: ABBAutores
         +ColeccionAutores()
@@ -341,8 +337,6 @@ classDiagram
     }
     class HashLibros {
         -cubetas: Nodo#42;[CUBETAS_LIBROS]
-        -HashLibros(const HashLibros&)
-        -operator=(const HashLibros&) HashLibros&
         -h(long int) int
         -crearLista(Nodo#42;&) void
         -destruirLista(Nodo#42;&) void
@@ -359,8 +353,6 @@ classDiagram
     }
     class ABBAutores {
         -raiz: Nodo#42;
-        -ABBAutores(const ABBAutores&)
-        -operator=(const ABBAutores&) ABBAutores&
         -destruirArbol(Nodo#42;&) void
         -insertarEnArbol(Nodo#42;&, Autor#42;) void
         -cargarIterador(Nodo#42;, Iterador&) void
@@ -373,8 +365,6 @@ classDiagram
         +cargarIterador(Iterador&) void
     }
     class Iterador {
-        -Iterador(const Iterador&)
-        -operator=(const Iterador&) Iterador&
         <<iterator>>
         -primero: Nodo#42;
         -ultimo: Nodo#42;
@@ -407,8 +397,6 @@ classDiagram
         DATOS_INVALIDOS
     }
     class Fachada {
-        -Fachada(const Fachada&)
-        -operator=(const Fachada&) Fachada&
         <<fachada>>
         -autores: ColeccionAutores
         -libros: ColeccionLibros

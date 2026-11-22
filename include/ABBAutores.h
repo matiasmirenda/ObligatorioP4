@@ -5,8 +5,6 @@
 class ABBAutores
 {
 private:
-    ABBAutores(const ABBAutores&);
-    ABBAutores& operator=(const ABBAutores&);
     struct Nodo
     {
         Autor* info;

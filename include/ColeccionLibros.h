@@ -8,8 +8,6 @@ using std::string;
 class ColeccionLibros
 {
 private:
-    ColeccionLibros(const ColeccionLibros&);
-    ColeccionLibros& operator=(const ColeccionLibros&);
     HashLibros tabla;
 
 

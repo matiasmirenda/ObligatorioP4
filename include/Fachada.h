@@ -10,8 +10,6 @@ using std::string;
 class Fachada
 {
 private:
-    Fachada(const Fachada&);
-    Fachada& operator=(const Fachada&);
     ColeccionAutores autores;
     ColeccionLibros libros;
 

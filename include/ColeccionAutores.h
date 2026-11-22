@@ -6,8 +6,6 @@
 class ColeccionAutores
 {
 private:
-    ColeccionAutores(const ColeccionAutores&);
-    ColeccionAutores& operator=(const ColeccionAutores&);
     ABBAutores tabla;
 
 

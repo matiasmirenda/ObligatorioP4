@@ -6,8 +6,6 @@
 class Iterador
 {
 private:
-    Iterador(const Iterador&);
-    Iterador& operator=(const Iterador&);
     struct Nodo
     {
         Objeto* info;
