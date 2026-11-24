@@ -1,7 +1,10 @@
+#include <iostream>
+#include "ValidacionDatos.h"
 #include "Libro.h"
-#include <cfloat>
 
-Libro::Libro(long int cod, string tit, string ed, double precio)
+using namespace std;
+
+Libro::Libro(long int cod, string tit, string ed, float precio)
     : titulo(tit), editorial(ed)
 {
     isbn = cod;
@@ -13,7 +16,7 @@ Libro::~Libro() {}
 long int Libro::getId() { return (isbn); }
 string Libro::getTitulo() { return (titulo); }
 string Libro::getEditorial() { return (editorial); }
-double Libro::getPrecioBase() { return (precioBase); }
+float Libro::getPrecioBase() { return (precioBase); }
 int Libro::getUnidadesVendidas() { return (unidadesVendidas); }
 
 void Libro::registrarVenta() { unidadesVendidas++; }
@@ -40,5 +43,42 @@ bool Libro::comienzaCon(string frase)
 }
 bool Libro::datosValidos()
 {
-    return (isbn > 0 && !(titulo == "") && !(editorial == "") && precioBase <= DBL_MAX && precioBase >= 0);
+    return (isbn > 0 && textoValido(titulo) && textoValido(editorial) && precioBase >= 0);
+}
+
+void Libro::imprimirTipo()
+{
+    switch (getTipo())
+    {
+        case NOVELA:
+            cout << "Novela";
+            break;
+        case TEXTO:
+            cout << "Texto";
+            break;
+        case ESCOLAR:
+            cout << "Escolar";
+            break;
+    }
+}
+
+void Libro::imprimir()
+{
+    cout << "ISBN: " << isbn << "\nTitulo: " << titulo
+              << "\nEditorial: " << editorial << "\nTipo: ";
+    imprimirTipo();
+    cout << "\nPrecio base: " << precioBase
+              << "\nUnidades vendidas: " << unidadesVendidas << '\n';
+}
+
+void Libro::imprimirBasico()
+{
+    cout << isbn << " | " << titulo << " | ";
+    imprimirTipo();
+    cout << '\n';
+}
+
+void Libro::imprimirPrecioVenta()
+{
+    cout << "Importe: " << calcularPrecioVenta() << '\n';
 }

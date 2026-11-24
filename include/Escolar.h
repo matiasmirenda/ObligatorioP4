@@ -4,15 +4,16 @@
 class Escolar : public Texto
 {
 private:
-    const string tipo;
     int anioEscuela;
 
 public:
-    Escolar(long int, string, string, double, string, Fecha, int);
+    void imprimir();
+    Escolar(long int, string, string, float, string, Fecha, int);
     ~Escolar();
     int getAnioEscuela();
     bool datosValidos();
-    double calcularPrecioVenta();
-    string getTipo();
+    // Aplica el descuento de Texto y el adicional de primero a tercero.
+    float calcularPrecioVenta();
+    TipoLibro getTipo();
 };
 #endif

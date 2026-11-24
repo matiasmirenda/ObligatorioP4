@@ -9,12 +9,13 @@ private:
     int anio;
 
 public:
+    void imprimir();
     Fecha(int, int, int);
     int getDia();
     int getMes();
     int getAnio();
 
-    // Valida el calendario y limita el anio a 1900..2099.
+    // Comprueba el calendario y el rango de anios 1900..2099.
     bool esValida();
 
     // PRECONDICION:

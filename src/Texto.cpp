@@ -1,23 +1,36 @@
+#include <iostream>
+#include "ValidacionDatos.h"
+#include "Parametros.h"
 #include "Texto.h"
 
-Texto::Texto(long int cod, string tit, string ed, double precio, string mat, Fecha fecha)
-    : Libro(cod, tit, ed, precio), tipo("Texto"), materia(mat), fechaPublicado(fecha) {}
+using namespace std;
+
+Texto::Texto(long int cod, string tit, string ed, float precio, string mat, Fecha fecha)
+    : Libro(cod, tit, ed, precio), materia(mat), fechaPublicado(fecha) {}
 string Texto::getMateria() { return (materia); }
 Fecha Texto::getFechaPublicado() { return (fechaPublicado); }
 bool Texto::datosValidos()
 {
-    return (Libro::datosValidos() && !(materia == "") && fechaPublicado.esValida());
+    return (Libro::datosValidos() && textoValido(materia) && fechaPublicado.esValida());
 }
-double Texto::calcularPrecioVenta()
+float Texto::calcularPrecioVenta()
 {
-    double precio = getPrecioBase();
-    Fecha corte(1, 1, 2026);
+    float precio = getPrecioBase();
+    Fecha corte(DIA_CORTE_DESCUENTO, MES_CORTE_DESCUENTO, ANIO_CORTE_DESCUENTO);
     if (fechaPublicado < corte)
-        precio = precio * 0.75;
+        precio = precio * FACTOR_PRECIO_TEXTO_ANTIGUO;
     return (precio);
 }
-string Texto::getTipo() { return (tipo); }
+TipoLibro Texto::getTipo() { return (TEXTO); }
 
 Texto::~Texto()
 {
+}
+
+void Texto::imprimir()
+{
+    Libro::imprimir();
+    cout << "Materia: " << materia << "\nPublicacion: ";
+    fechaPublicado.imprimir();
+    cout << '\n';
 }

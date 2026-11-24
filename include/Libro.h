@@ -3,35 +3,40 @@
 
 #include <string>
 #include "Objeto.h"
+#include "TipoLibro.h"
 using std::string;
 
 class Libro : public Objeto
 {
 private:
+    void imprimirTipo();
     long int isbn;
     string titulo;
     string editorial;
-    double precioBase;
+    float precioBase;
     int unidadesVendidas;
 
 public:
-    // Guarda los datos; comprobar datosValidos() antes de insertar.
-    Libro(long int, string, string, double);
+    Libro(long int, string, string, float);
     virtual ~Libro();
     long int getId();
     string getTitulo();
     string getEditorial();
-    double getPrecioBase();
+    float getPrecioBase();
     int getUnidadesVendidas();
 
-    // PRECONDICION:
-    // 1- Las unidades vendidas son menores que el maximo representable por int.
+    virtual void imprimir();
+    void imprimirBasico();
+    void imprimirPrecioVenta();
     void registrarVenta();
+    // Indica si el titulo comienza exactamente con la frase, distinguiendo mayusculas.
     bool comienzaCon(string);
+    // Comprueba ISBN positivo, titulo y editorial con contenido y longitud permitida, y precio no negativo.
     virtual bool datosValidos();
+    // Devuelve el precio de la unidad aplicando los descuentos de su tipo.
     // PRECONDICION:
     // 1- Los datos del libro son validos.
-    virtual double calcularPrecioVenta() = 0;
-    virtual string getTipo() = 0;
+    virtual float calcularPrecioVenta() = 0;
+    virtual TipoLibro getTipo() = 0;
 };
 #endif

@@ -1,0 +1,69 @@
+digraph Modulos {
+graph [rankdir=TB, splines=ortho, nodesep=0.35, ranksep=0.80, bgcolor="white", pad=0.35, outputorder=edgesfirst, fontname="Arial"];
+node [shape=plain, fontname="Arial"];
+Objeto [group="centro"]; Libro [group="centro"]; Fachada [group="centro"]; Menu [group="centro"]; main [group="centro"];
+edge [color="#64748B", penwidth=1.15, arrowsize=0.65];
+ABBAutores [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#3F6685"><TR><TD PORT="h" BGCOLOR="#DDEBF5"><FONT POINT-SIZE="14"><B>ABBAutores.h</B></FONT></TD></TR><TR><TD BGCOLOR="#F8FAFC"><FONT POINT-SIZE="12" COLOR="#526477">ABBAutores.cpp</FONT></TD></TR></TABLE>>];
+Autor [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#3F6685"><TR><TD PORT="h" BGCOLOR="#DDEBF5"><FONT POINT-SIZE="14"><B>Autor.h</B></FONT></TD></TR><TR><TD BGCOLOR="#F8FAFC"><FONT POINT-SIZE="12" COLOR="#526477">Autor.cpp</FONT></TD></TR></TABLE>>];
+ColeccionAutores [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#3F6685"><TR><TD PORT="h" BGCOLOR="#DDEBF5"><FONT POINT-SIZE="14"><B>ColeccionAutores.h</B></FONT></TD></TR><TR><TD BGCOLOR="#F8FAFC"><FONT POINT-SIZE="12" COLOR="#526477">ColeccionAutores.cpp</FONT></TD></TR></TABLE>>];
+ColeccionLibros [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#3F6685"><TR><TD PORT="h" BGCOLOR="#DDEBF5"><FONT POINT-SIZE="14"><B>ColeccionLibros.h</B></FONT></TD></TR><TR><TD BGCOLOR="#F8FAFC"><FONT POINT-SIZE="12" COLOR="#526477">ColeccionLibros.cpp</FONT></TD></TR></TABLE>>];
+Escolar [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#3F6685"><TR><TD PORT="h" BGCOLOR="#DDEBF5"><FONT POINT-SIZE="14"><B>Escolar.h</B></FONT></TD></TR><TR><TD BGCOLOR="#F8FAFC"><FONT POINT-SIZE="12" COLOR="#526477">Escolar.cpp</FONT></TD></TR></TABLE>>];
+Fachada [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#3F6685"><TR><TD PORT="h" BGCOLOR="#DDEBF5"><FONT POINT-SIZE="14"><B>Fachada.h</B></FONT></TD></TR><TR><TD BGCOLOR="#F8FAFC"><FONT POINT-SIZE="12" COLOR="#526477">Fachada.cpp</FONT></TD></TR></TABLE>>];
+Fecha [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#3F6685"><TR><TD PORT="h" BGCOLOR="#DDEBF5"><FONT POINT-SIZE="14"><B>Fecha.h</B></FONT></TD></TR><TR><TD BGCOLOR="#F8FAFC"><FONT POINT-SIZE="12" COLOR="#526477">Fecha.cpp</FONT></TD></TR></TABLE>>];
+HashLibros [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#3F6685"><TR><TD PORT="h" BGCOLOR="#DDEBF5"><FONT POINT-SIZE="14"><B>HashLibros.h</B></FONT></TD></TR><TR><TD BGCOLOR="#F8FAFC"><FONT POINT-SIZE="12" COLOR="#526477">HashLibros.cpp</FONT></TD></TR></TABLE>>];
+Iterador [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#3F6685"><TR><TD PORT="h" BGCOLOR="#DDEBF5"><FONT POINT-SIZE="14"><B>Iterador.h</B></FONT></TD></TR><TR><TD BGCOLOR="#F8FAFC"><FONT POINT-SIZE="12" COLOR="#526477">Iterador.cpp</FONT></TD></TR></TABLE>>];
+Libro [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#3F6685"><TR><TD PORT="h" BGCOLOR="#DDEBF5"><FONT POINT-SIZE="14"><B>Libro.h</B></FONT></TD></TR><TR><TD BGCOLOR="#F8FAFC"><FONT POINT-SIZE="12" COLOR="#526477">Libro.cpp</FONT></TD></TR></TABLE>>];
+MensajesError [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#3F6685"><TR><TD PORT="h" BGCOLOR="#DDEBF5"><FONT POINT-SIZE="14"><B>MensajesError.h</B></FONT></TD></TR><TR><TD BGCOLOR="#F8FAFC"><FONT POINT-SIZE="12" COLOR="#526477">MensajesError.cpp</FONT></TD></TR></TABLE>>];
+Menu [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#3F6685"><TR><TD PORT="h" BGCOLOR="#DDEBF5"><FONT POINT-SIZE="14"><B>Menu.h</B></FONT></TD></TR><TR><TD BGCOLOR="#F8FAFC"><FONT POINT-SIZE="12" COLOR="#526477">Menu.cpp</FONT></TD></TR></TABLE>>];
+Novela [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#3F6685"><TR><TD PORT="h" BGCOLOR="#DDEBF5"><FONT POINT-SIZE="14"><B>Novela.h</B></FONT></TD></TR><TR><TD BGCOLOR="#F8FAFC"><FONT POINT-SIZE="12" COLOR="#526477">Novela.cpp</FONT></TD></TR></TABLE>>];
+Objeto [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#3F6685"><TR><TD PORT="h" BGCOLOR="#DDEBF5"><FONT POINT-SIZE="14"><B>Objeto.h</B></FONT></TD></TR><TR><TD BGCOLOR="#F8FAFC"><FONT POINT-SIZE="12" COLOR="#526477">Objeto.cpp</FONT></TD></TR></TABLE>>];
+Parametros [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#749584"><TR><TD PORT="h" BGCOLOR="#ECF5EF"><FONT POINT-SIZE="13">Parametros.h</FONT></TD></TR></TABLE>>];
+Texto [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#3F6685"><TR><TD PORT="h" BGCOLOR="#DDEBF5"><FONT POINT-SIZE="14"><B>Texto.h</B></FONT></TD></TR><TR><TD BGCOLOR="#F8FAFC"><FONT POINT-SIZE="12" COLOR="#526477">Texto.cpp</FONT></TD></TR></TABLE>>];
+TipoError [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#749584"><TR><TD PORT="h" BGCOLOR="#ECF5EF"><FONT POINT-SIZE="13">TipoError.h</FONT></TD></TR></TABLE>>];
+TipoLibro [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#749584"><TR><TD PORT="h" BGCOLOR="#ECF5EF"><FONT POINT-SIZE="13">TipoLibro.h</FONT></TD></TR></TABLE>>];
+ValidacionDatos [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="8" COLOR="#3F6685"><TR><TD PORT="h" BGCOLOR="#DDEBF5"><FONT POINT-SIZE="14"><B>ValidacionDatos.h</B></FONT></TD></TR><TR><TD BGCOLOR="#F8FAFC"><FONT POINT-SIZE="12" COLOR="#526477">ValidacionDatos.cpp</FONT></TD></TR></TABLE>>];
+main [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="10" COLOR="#183C59"><TR><TD PORT="h" BGCOLOR="#183C59"><FONT COLOR="white" POINT-SIZE="14">main.cpp</FONT></TD></TR></TABLE>>];
+{ rank=same; Parametros; Objeto; TipoLibro; TipoError; }
+{ rank=same; ValidacionDatos; Autor; Iterador; Fecha; }
+{ rank=same; Libro; ABBAutores; MensajesError; }
+{ rank=same; Novela; Texto; HashLibros; ColeccionAutores; }
+{ rank=same; Escolar; ColeccionLibros; }
+{ rank=same; Fachada; }
+{ rank=same; Menu; }
+{ rank=same; main; }
+ABBAutores:h:e -> ColeccionAutores:h:n [tailclip=false, headclip=false];
+Autor:h:e -> ABBAutores:h:n [tailclip=false, headclip=false];
+Autor:h:e -> Novela:h:n [tailclip=false, headclip=false];
+ColeccionAutores:h:e -> Fachada:h:n [tailclip=false, headclip=false];
+ColeccionLibros:h:e -> Fachada:h:n [tailclip=false, headclip=false];
+Escolar:h:e -> Fachada:h:n [tailclip=false, headclip=false];
+Fachada:h:e -> Menu:h:n [tailclip=false, headclip=false, weight=30];
+Fecha:h:e -> Menu:h:n [tailclip=false, headclip=false];
+Fecha:h:e -> Texto:h:n [tailclip=false, headclip=false];
+HashLibros:h:e -> ColeccionLibros:h:n [tailclip=false, headclip=false];
+Iterador:h:e -> ABBAutores:h:n [tailclip=false, headclip=false];
+Iterador:h:e -> HashLibros:h:n [tailclip=false, headclip=false];
+Libro:h:e -> HashLibros:h:n [tailclip=false, headclip=false];
+Libro:h:e -> Novela:h:n [tailclip=false, headclip=false];
+Libro:h:e -> Texto:h:n [tailclip=false, headclip=false];
+MensajesError:h:e -> Menu:h:n [tailclip=false, headclip=false];
+Menu:h:e -> main:h:n [tailclip=false, headclip=false, weight=30];
+Novela:h:e -> Fachada:h:n [tailclip=false, headclip=false];
+Objeto:h:e -> Autor:h:n [tailclip=false, headclip=false];
+Objeto:h:e -> Iterador:h:n [tailclip=false, headclip=false];
+Objeto:h:e -> Libro:h:n [tailclip=false, headclip=false];
+Parametros:h:e -> Escolar:h:n [tailclip=false, headclip=false];
+Parametros:h:e -> Fecha:h:n [tailclip=false, headclip=false];
+Parametros:h:e -> Menu:h:n [tailclip=false, headclip=false];
+Parametros:h:e -> Novela:h:n [tailclip=false, headclip=false];
+Parametros:h:e -> Texto:h:n [tailclip=false, headclip=false];
+Parametros:h:e -> ValidacionDatos:h:n [tailclip=false, headclip=false];
+Texto:h:e -> Escolar:h:n [tailclip=false, headclip=false];
+TipoError:h:e -> Fachada:h:n [tailclip=false, headclip=false];
+TipoError:h:e -> MensajesError:h:n [tailclip=false, headclip=false];
+TipoLibro:h:e -> Libro:h:n [tailclip=false, headclip=false];
+ValidacionDatos:h:e -> Libro:h:n [tailclip=false, headclip=false];
+ValidacionDatos:h:e -> Menu:h:n [tailclip=false, headclip=false];
+ValidacionDatos:h:e -> Novela:h:n [tailclip=false, headclip=false];
+ValidacionDatos:h:e -> Texto:h:n [tailclip=false, headclip=false];
+}

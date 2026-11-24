@@ -1,23 +1,14 @@
-#include "Fecha.h"
-#include "Autor.h"
-#include "Objeto.h"
+#include "Parametros.h"
 #include "Novela.h"
-#include "Texto.h"
 #include "Escolar.h"
-#include "ColeccionLibros.h"
-#include "ColeccionAutores.h"
-#include "HashLibros.h"
-#include "ABBAutores.h"
-#include "Iterador.h"
 #include "MensajesError.h"
 #include "Fachada.h"
 #include "Menu.h"
+#include "ValidacionDatos.h"
 #include <sstream>
-#include <limits>
-#include "TipoError.h"
-#include "Libro.h"
 #include <iostream>
-#include <cstddef>
+
+using namespace std;
 
 int fallos = 0;
 
@@ -25,18 +16,19 @@ void verificar(bool condicion, const char* descripcion)
 {
     if (!condicion)
     {
-        std::cerr << "FALLO: " << descripcion << '\n';
+        cerr << "FALLO: " << descripcion << '\n';
         fallos++;
     }
+    else
+        cout << "OK: " << descripcion << '\n';
 }
 
-bool mismoImporte(double obtenido, double esperado)
+bool mismoImporte(float obtenido, float esperado)
 {
-    double diferencia = obtenido - esperado;
-    return (diferencia > -0.000001 && diferencia < 0.000001);
+    float diferencia = obtenido - esperado;
+    return (diferencia > -0.0001f && diferencia < 0.0001f);
 }
 
-// Las marcas permiten comprobar la destruccion por punteros a clases base.
 class NovelaControlada : public Novela
 {
 private:
@@ -121,9 +113,9 @@ void probarAutor()
 
 void probarLibro()
 {
-    Novela novela(1234567890123L, "El camino", "Editorial", 100, "aventura");
+    Novela novela(2147483647L, "El camino", "Editorial", 100, "aventura");
     Libro* libro = &novela;
-    verificar(libro->getId() == 1234567890123L, "ISBN como identificador de Libro");
+    verificar(libro->getId() == 2147483647L, "identificador numerico almacenado por Libro");
     verificar(libro->getTitulo() == "El camino" && libro->getEditorial() == "Editorial",
               "datos comunes del libro");
     verificar(libro->getPrecioBase() == 100 && libro->getUnidadesVendidas() == 0,
@@ -160,7 +152,7 @@ void probarNovela()
         Novela infantil(1, "Cuentos", "Editorial", 100, "infantil");
         Novela comun(2, "Otra", "E", 100, "aventura");
         Libro* libro = &infantil;
-        verificar(libro->getTipo() == "Novela" && infantil.getGenero() == "infantil",
+        verificar(libro->getTipo() == NOVELA && infantil.getGenero() == "infantil",
                   "tipo y genero de novela");
         verificar(mismoImporte(libro->calcularPrecioVenta(), 80), "descuento infantil");
         verificar(mismoImporte(comun.calcularPrecioVenta(), 100), "novela comun sin descuento");
@@ -186,7 +178,7 @@ void probarTexto()
     verificar(mismoImporte(libro->calcularPrecioVenta(), 75), "texto anterior al corte tiene descuento");
     verificar(mismoImporte(corte.calcularPrecioVenta(), 100), "corte exacto sin descuento");
     verificar(mismoImporte(posterior.calcularPrecioVenta(), 100), "fecha posterior sin descuento");
-    verificar(libro->getTipo() == "Texto" && anterior.getMateria() == "Matematica",
+    verificar(libro->getTipo() == TEXTO && anterior.getMateria() == "Matematica",
               "tipo y materia de Texto");
     Fecha publicada = anterior.getFechaPublicado();
     verificar(publicada.getDia() == 31 && publicada.getMes() == 12 && publicada.getAnio() == 2025,
@@ -203,13 +195,13 @@ void probarEscolar()
     {
         Escolar viejo(1, "Escolar", "E", 100, "M", Fecha(31, 12, 2025), anio);
         Escolar nuevo(2, "Escolar", "E", 100, "M", Fecha(1, 1, 2026), anio);
-        double esperadoViejo = anio <= 3 ? 67.5 : 75;
-        double esperadoNuevo = anio <= 3 ? 90 : 100;
+        float esperadoViejo = anio <= 3 ? 67.5f : 75;
+        float esperadoNuevo = anio <= 3 ? 90 : 100;
         Libro* libro = &viejo;
         verificar(viejo.datosValidos() && viejo.getAnioEscuela() == anio, "anio escolar valido");
         verificar(mismoImporte(libro->calcularPrecioVenta(), esperadoViejo), "descuentos escolares acumulados");
         verificar(mismoImporte(nuevo.calcularPrecioVenta(), esperadoNuevo), "escolar desde corte");
-        verificar(libro->getTipo() == "Escolar", "tipo Escolar mediante Libro*");
+        verificar(libro->getTipo() == ESCOLAR, "tipo Escolar mediante Libro*");
     }
     verificar(!Escolar(1, "T", "E", 1, "M", Fecha(1, 1, 2000), 0).datosValidos(), "anio escolar cero");
     verificar(!Escolar(1, "T", "E", 1, "M", Fecha(1, 1, 2000), 7).datosValidos(), "anio escolar mayor a seis");
@@ -235,7 +227,7 @@ void probarIterador()
         verificar(iter.hayActual() && iter.actual() == &novela && iter.actual()->getId() == 20,
                   "Iterador unico acepta Libro como Objeto*");
         Libro* actualLibro = (Libro*) iter.actual();
-        verificar(actualLibro->getTipo() == "Novela", "cast con origen conocido a Libro*");
+        verificar(actualLibro->getTipo() == NOVELA, "cast con origen conocido a Libro*");
         iter.avanzar();
         verificar(!iter.hayActual(), "fin de recorrido no circular");
         iter.reiniciar();
@@ -313,7 +305,7 @@ void probarHashLibros()
                   "eliminar recorrido no elimina libros de hash");
     }
     verificar(destruidoUno && destruidoDos && destruidoTres, "HashLibros libera payload por destructor virtual");
-    // estaVacia tambien debe funcionar con elementos en la ultima o primera cubeta.
+
     HashLibros extremo;
     extremo.insertar(new Novela(500, "Primera", "E", 10, "aventura"));
     verificar(!extremo.estaVacia() && extremo.existe(500), "cubeta cero con clave positiva");
@@ -446,158 +438,189 @@ void probarMensajesError()
     verificar(mensajeError((TipoError) -1) == "Error desconocido.", "codigo de error desconocido");
 }
 
+string probarSalidaFachada(Fachada& fachada, long int opcion, string texto, long int isbn,
+                          float precio, TipoError& error)
+{
+    ostringstream salida;
+    streambuf* original = cout.rdbuf(salida.rdbuf());
+    error = SIN_ERROR;
+    switch (opcion)
+    {
+        case OPCION_LISTAR_POR_PREFIJO:
+            fachada.listarPorPrefijo(texto, error);
+            break;
+        case OPCION_CONSULTAR_LIBRO:
+            fachada.consultarLibro(isbn, error);
+            break;
+        case OPCION_LISTAR_AUTORES:
+            fachada.listarAutores(error);
+            break;
+        case OPCION_REGISTRAR_VENTA:
+            fachada.registrarVenta(isbn, error);
+            break;
+        case OPCION_CALCULAR_RECAUDACION:
+            fachada.calcularRecaudacion(texto);
+            break;
+        case OPCION_CONTAR_VENTAS_POR_TIPO:
+            fachada.contarVentasPorTipo(precio);
+            break;
+        case OPCION_CONSULTAR_MAS_VENDIDO:
+            fachada.consultarMasVendido(texto, error);
+            break;
+    }
+    cout.rdbuf(original);
+    return (salida.str());
+}
+
+int contarLineas(string texto)
+{
+    int cantidad = 0;
+    for (unsigned int i = 0; i < texto.size(); i++)
+        if (texto[i] == '\n')
+            cantidad++;
+    return (cantidad);
+}
+
 void probarFachada()
 {
     Fachada fachada;
     TipoError error;
-    Libro* resultado = NULL;
-    double importe = 99;
-    long int novelas, textos, escolares;
-    fachada.consultarLibro(1, resultado, error);
-    verificar(error == LIBRO_NO_EXISTE && resultado == NULL, "consulta inexistente");
-    fachada.registrarVenta(1, importe, error);
-    verificar(error == LIBRO_NO_EXISTE && importe == 0, "venta inexistente sin efecto");
-    fachada.asociarAutor(1, 1, error);
+    string salida = probarSalidaFachada(fachada, OPCION_CONSULTAR_LIBRO, "", 1000000000001L, 0, error);
+    verificar(error == LIBRO_NO_EXISTE && salida == "", "consulta inexistente sin imprimir datos");
+    salida = probarSalidaFachada(fachada, OPCION_REGISTRAR_VENTA, "", 1000000000001L, 0, error);
+    verificar(error == LIBRO_NO_EXISTE && salida == "", "venta inexistente no imprime importe");
+    fachada.asociarAutor(1000000000001L, 10000001, error);
     verificar(error == LIBRO_NO_EXISTE, "asociar libro inexistente");
-    {
-        Iterador iter;
-        fachada.listarAutores(iter, error);
-        verificar(error == SIN_AUTORES && !iter.hayActual(), "autores vacios en fachada");
-    }
-    {
-        Iterador iter;
-        fachada.listarPorPrefijo("El", iter, error);
-        verificar(error == SIN_COINCIDENCIAS && !iter.hayActual(), "prefijo sin libros");
-    }
-    fachada.consultarMasVendido("E", resultado, error);
-    verificar(error == SIN_LIBROS_DE_EDITORIAL && resultado == NULL, "editorial inexistente");
-    verificar(fachada.calcularRecaudacion("E") == 0, "recaudacion vacia");
-    fachada.contarVentasPorTipo(0, novelas, textos, escolares);
-    verificar(novelas == 0 && textos == 0 && escolares == 0, "contadores vacios");
-    fachada.registrarAutor(0, "A", "B", error);
-    verificar(error == DATOS_INVALIDOS, "cedula invalida");
-    fachada.registrarAutor(1, "", "B", error);
-    verificar(error == DATOS_INVALIDOS, "nombre invalido");
-    fachada.registrarAutor(1, "A", "", error);
-    verificar(error == DATOS_INVALIDOS, "apellido invalido");
-    fachada.registrarAutor(20, "Ana", "Perez", error);
+    salida = probarSalidaFachada(fachada, OPCION_LISTAR_AUTORES, "", 0, 0, error);
+    verificar(error == SIN_AUTORES && salida == "", "autores vacios sin salida de datos");
+    salida = probarSalidaFachada(fachada, OPCION_LISTAR_POR_PREFIJO, "El", 0, 0, error);
+    verificar(error == SIN_COINCIDENCIAS && salida == "", "prefijo sin libros sin salida de datos");
+    salida = probarSalidaFachada(fachada, OPCION_CONSULTAR_MAS_VENDIDO, "E", 0, 0, error);
+    verificar(error == SIN_LIBROS_DE_EDITORIAL && salida == "", "editorial inexistente sin salida de datos");
+    salida = probarSalidaFachada(fachada, OPCION_CALCULAR_RECAUDACION, "E", 0, 0, error);
+    verificar(salida == "Recaudacion: 0\n", "coleccion imprime recaudacion vacia");
+    salida = probarSalidaFachada(fachada, OPCION_CONTAR_VENTAS_POR_TIPO, "", 0, 0, error);
+    verificar(salida == "Unidades vendidas: novelas 0, textos comunes 0, escolares 0\n", "coleccion imprime contadores vacios");
+    fachada.registrarAutor(10000020, "Ana", "Perez", error);
     verificar(error == SIN_ERROR, "alta autor fachada");
-    fachada.registrarAutor(10, "Luis", "Lopez", error);
+    fachada.registrarAutor(10000010, "Luis", "Lopez", error);
     verificar(error == SIN_ERROR, "segundo autor fachada");
-    fachada.registrarAutor(20, "Otro", "Nombre", error);
+    fachada.registrarAutor(10000020, "Otro", "Nombre", error);
     verificar(error == AUTOR_YA_EXISTE, "autor duplicado");
-    fachada.registrarLibro(NULL, error);
-    verificar(error == DATOS_INVALIDOS, "libro nulo rechazado");
-    Libro* invalido = new Texto(99, "T", "E", 10, "M", Fecha(31, 2, 2026));
-    fachada.registrarLibro(invalido, error);
-    verificar(error == DATOS_INVALIDOS, "fecha invalida no se registra");
-    delete invalido;
-    invalido = new Novela(99, "N", "E", std::numeric_limits<double>::infinity(), "aventura");
-    fachada.registrarLibro(invalido, error);
-    verificar(error == DATOS_INVALIDOS, "precio infinito rechazado");
-    delete invalido;
-    invalido = new Novela(99, "N", "E", 10, "aventura");
-    invalido->registrarVenta();
-    fachada.registrarLibro(invalido, error);
-    verificar(error == DATOS_INVALIDOS, "alta requiere cero ventas");
-    delete invalido;
-    Libro* infantil = new Novela(1, "El bosque", "E", 100, "infantil");
-    Libro* texto = new Texto(2, "El texto", "E", 200, "M", Fecha(31, 12, 2025));
-    Libro* escolar = new Escolar(3, "Escuela", "E", 100, "M", Fecha(1, 1, 2026), 2);
-    Libro* otra = new Novela(4, "Otra", "Otra editorial", 500, "aventura");
-    Libro* altas[4] = {infantil, texto, escolar, otra};
-    for (int i = 0; i < 4; i++)
-    {
-        fachada.registrarLibro(altas[i], error);
-        verificar(error == SIN_ERROR && altas[i]->getUnidadesVendidas() == 0, "alta libro fachada");
-    }
-    Libro* repetido = new Novela(1, "Duplicado", "E", 10, "aventura");
-    fachada.registrarLibro(repetido, error);
-    verificar(error == LIBRO_YA_EXISTE, "libro duplicado sigue siendo del llamador");
-    delete repetido;
-    fachada.consultarLibro(1, resultado, error);
-    verificar(error == SIN_ERROR && resultado == infantil, "consulta referencia original");
-    fachada.asociarAutor(2, 20, error);
+    fachada.registrarLibro(NOVELA, 1000000000001L, "El bosque", "E", 100, "infantil", "", 0, 0, 0, 0, error);
+    verificar(error == SIN_ERROR, "alta novela fachada");
+    fachada.registrarLibro(TEXTO, 1000000000002L, "El texto", "E", 200, "", "M", 31, 12, 2025, 0, error);
+    verificar(error == SIN_ERROR, "alta texto fachada");
+    fachada.registrarLibro(ESCOLAR, 1000000000003L, "Escuela", "E", 100, "", "M", 1, 1, 2026, 2, error);
+    verificar(error == SIN_ERROR, "alta escolar fachada");
+    fachada.registrarLibro(NOVELA, 1000000000004L, "Otra", "Otra editorial", 500, "aventura", "", 0, 0, 0, 0, error);
+    verificar(error == SIN_ERROR, "alta novela de otra editorial");
+    salida = probarSalidaFachada(fachada, OPCION_CONSULTAR_LIBRO, "", 1000000000001L, 0, error);
+    verificar(error == SIN_ERROR && salida.find("Titulo: El bosque\n") != string::npos
+              && salida.find("Tipo: Novela\n") != string::npos && salida.find("Genero: infantil\n") != string::npos,
+              "impresion polimorfica de novela desde Libro");
+    verificar(salida.find("Unidades vendidas: 0\n") != string::npos
+              && salida.find("Sin autor asociado.\n") != string::npos, "alta novela inicia sin ventas ni autor");
+    salida = probarSalidaFachada(fachada, OPCION_CONSULTAR_LIBRO, "", 1000000000002L, 0, error);
+    verificar(salida.find("Tipo: Texto\n") != string::npos && salida.find("Materia: M\n") != string::npos
+              && salida.find("Publicacion: 31/12/2025\n") != string::npos, "texto y fecha imprimen sus datos");
+    salida = probarSalidaFachada(fachada, OPCION_CONSULTAR_LIBRO, "", 1000000000003L, 0, error);
+    verificar(salida.find("Tipo: Escolar\n") != string::npos && salida.find("Materia: M\n") != string::npos
+              && salida.find("Anio escolar: 2\n") != string::npos, "escolar imprime datos heredados y propios");
+    fachada.registrarLibro(NOVELA, 1000000000001L, "Duplicado", "E", 10, "aventura", "", 0, 0, 0, 0, error);
+    verificar(error == LIBRO_YA_EXISTE, "libro duplicado rechazado");
+    salida = probarSalidaFachada(fachada, OPCION_CONSULTAR_LIBRO, "", 1000000000001L, 0, error);
+    verificar(salida.find("Titulo: El bosque\n") != string::npos, "duplicado no reemplaza al original");
+    fachada.asociarAutor(1000000000002L, 10000020, error);
     verificar(error == LIBRO_NO_ES_NOVELA, "no convertir texto a novela");
-    fachada.asociarAutor(1, 99, error);
-    verificar(error == AUTOR_NO_EXISTE && ((Novela*) infantil)->getAutor() == NULL, "autor ausente sin efecto");
-    fachada.asociarAutor(1, 20, error);
-    verificar(error == SIN_ERROR && ((Novela*) infantil)->getAutor()->getId() == 20, "asociar autor existente");
-    fachada.asociarAutor(1, 10, error);
-    verificar(error == SIN_ERROR && ((Novela*) infantil)->getAutor()->getId() == 10, "reemplazar asociacion");
-    {
-        Iterador iter;
-        fachada.listarAutores(iter, error);
-        verificar(error == SIN_ERROR && iter.actual()->getId() == 10, "autores ordenados primero");
-        iter.avanzar();
-        verificar(iter.actual()->getId() == 20 && ((Autor*) iter.actual())->getNombre() == "Ana", "autor anterior sigue registrado");
-        iter.avanzar();
-        verificar(!iter.hayActual(), "sin autores duplicados");
-    }
-    {
-        Iterador iter;
-        fachada.listarPorPrefijo("El ", iter, error);
-        int cantidad = 0;
-        while (iter.hayActual())
-        {
-            verificar(iter.actual() == infantil || iter.actual() == texto, "prefijo exacto");
-            cantidad++;
-            iter.avanzar();
-        }
-        verificar(error == SIN_ERROR && cantidad == 2, "dos coincidencias");
-    }
-    {
-        Iterador iter;
-        fachada.listarPorPrefijo("el", iter, error);
-        verificar(error == SIN_COINCIDENCIAS, "prefijo distingue mayusculas");
-    }
-    fachada.consultarMasVendido("E", resultado, error);
-    verificar(error == SIN_ERROR && resultado->getUnidadesVendidas() == 0, "maximo valido sin ventas y empate");
-    fachada.registrarVenta(1, importe, error);
-    verificar(error == SIN_ERROR && mismoImporte(importe, 80), "venta infantil");
-    fachada.registrarVenta(2, importe, error);
-    verificar(error == SIN_ERROR && mismoImporte(importe, 150), "venta texto antiguo");
-    fachada.registrarVenta(3, importe, error);
-    verificar(error == SIN_ERROR && mismoImporte(importe, 90), "venta escolar");
-    fachada.registrarVenta(1, importe, error);
-    verificar(error == SIN_ERROR && infantil->getUnidadesVendidas() == 2, "incrementa exactamente una venta");
-    fachada.registrarVenta(4, importe, error);
-    verificar(error == SIN_ERROR && mismoImporte(importe, 500), "venta otra editorial");
-    verificar(mismoImporte(fachada.calcularRecaudacion("E"), 400), "total editorial con descuentos");
-    verificar(fachada.calcularRecaudacion("Ausente") == 0, "editorial ausente devuelve cero");
-    fachada.contarVentasPorTipo(99, novelas, textos, escolares);
-    verificar(novelas == 3 && textos == 1 && escolares == 1, "ventas discriminadas por tipo");
-    fachada.contarVentasPorTipo(100, novelas, textos, escolares);
-    verificar(novelas == 1 && textos == 1 && escolares == 0, "precio estrictamente mayor");
-    fachada.contarVentasPorTipo(500, novelas, textos, escolares);
-    verificar(novelas == 0 && textos == 0 && escolares == 0, "reinicia acumuladores");
-    fachada.consultarMasVendido("E", resultado, error);
-    verificar(error == SIN_ERROR && resultado == infantil, "maximo por unidades no por precio");
-    fachada.consultarLibro(999, resultado, error);
-    verificar(error == LIBRO_NO_EXISTE && resultado == NULL, "consulta fallida reinicia resultado");
-    fachada.consultarMasVendido("Ausente", resultado, error);
-    verificar(error == SIN_LIBROS_DE_EDITORIAL && resultado == NULL, "maximo fallido reinicia resultado");
+    fachada.asociarAutor(1000000000001L, 10000099, error);
+    verificar(error == AUTOR_NO_EXISTE, "asociacion con autor ausente rechazada");
+    salida = probarSalidaFachada(fachada, OPCION_CONSULTAR_LIBRO, "", 1000000000001L, 0, error);
+    verificar(salida.find("Sin autor asociado.\n") != string::npos, "asociacion rechazada no modifica novela");
+    fachada.asociarAutor(1000000000001L, 10000020, error);
+    verificar(error == SIN_ERROR, "asociar autor existente");
+    salida = probarSalidaFachada(fachada, OPCION_CONSULTAR_LIBRO, "", 1000000000001L, 0, error);
+    verificar(salida.find("Autor: 10000020 | Ana | Perez\n") != string::npos, "novela llama a imprimir del autor asociado");
+    fachada.asociarAutor(1000000000001L, 10000010, error);
+    verificar(error == SIN_ERROR, "reemplazar asociacion");
+    salida = probarSalidaFachada(fachada, OPCION_CONSULTAR_LIBRO, "", 1000000000001L, 0, error);
+    verificar(salida.find("Autor: 10000010 | Luis | Lopez\n") != string::npos
+              && salida.find("10000020") == string::npos, "novela imprime solo el autor actual");
+    salida = probarSalidaFachada(fachada, OPCION_LISTAR_AUTORES, "", 0, 0, error);
+    verificar(error == SIN_ERROR && salida == "10000010 | Luis | Lopez\n10000020 | Ana | Perez\n",
+              "autores imprimen una linea cada uno en orden y conservan al autor reemplazado");
+    salida = probarSalidaFachada(fachada, OPCION_LISTAR_POR_PREFIJO, "El ", 0, 0, error);
+    verificar(error == SIN_ERROR && salida.find("1000000000001 | El bosque | Novela\n") != string::npos
+              && salida.find("1000000000002 | El texto | Texto\n") != string::npos,
+              "libros imprimen datos basicos para el prefijo exacto");
+    verificar(contarLineas(salida) == 2 && salida.find("Genero:") == string::npos,
+              "listado basico contiene solo dos filas y no datos completos");
+    salida = probarSalidaFachada(fachada, OPCION_LISTAR_POR_PREFIJO, "el", 0, 0, error);
+    verificar(error == SIN_COINCIDENCIAS && salida == "", "prefijo distingue mayusculas");
+    salida = probarSalidaFachada(fachada, OPCION_CONSULTAR_MAS_VENDIDO, "E", 0, 0, error);
+    verificar(error == SIN_ERROR && salida.find("Unidades vendidas: 0\n") != string::npos,
+              "maximo admite empate sin ventas");
+    salida = probarSalidaFachada(fachada, OPCION_REGISTRAR_VENTA, "", 1000000000001L, 0, error);
+    verificar(error == SIN_ERROR && salida == "Importe: 80\n", "libro imprime importe de venta infantil");
+    salida = probarSalidaFachada(fachada, OPCION_REGISTRAR_VENTA, "", 1000000000002L, 0, error);
+    verificar(error == SIN_ERROR && salida == "Importe: 150\n", "libro imprime importe de texto antiguo");
+    salida = probarSalidaFachada(fachada, OPCION_REGISTRAR_VENTA, "", 1000000000003L, 0, error);
+    verificar(error == SIN_ERROR && salida == "Importe: 90\n", "libro imprime importe escolar");
+    salida = probarSalidaFachada(fachada, OPCION_REGISTRAR_VENTA, "", 1000000000001L, 0, error);
+    verificar(error == SIN_ERROR && salida == "Importe: 80\n", "segunda venta imprime importe");
+    salida = probarSalidaFachada(fachada, OPCION_CONSULTAR_LIBRO, "", 1000000000001L, 0, error);
+    verificar(salida.find("Unidades vendidas: 2\n") != string::npos, "cada venta incrementa exactamente una unidad");
+    salida = probarSalidaFachada(fachada, OPCION_REGISTRAR_VENTA, "", 1000000000004L, 0, error);
+    verificar(error == SIN_ERROR && salida == "Importe: 500\n", "venta de otra editorial");
+    salida = probarSalidaFachada(fachada, OPCION_CALCULAR_RECAUDACION, "E", 0, 0, error);
+    verificar(salida == "Recaudacion: 400\n", "coleccion imprime recaudacion con descuentos");
+    salida = probarSalidaFachada(fachada, OPCION_CALCULAR_RECAUDACION, "Ausente", 0, 0, error);
+    verificar(salida == "Recaudacion: 0\n", "recaudacion de editorial ausente es cero");
+    salida = probarSalidaFachada(fachada, OPCION_CONTAR_VENTAS_POR_TIPO, "", 0, 99, error);
+    verificar(salida == "Unidades vendidas: novelas 3, textos comunes 1, escolares 1\n", "ventas discriminadas por tipo");
+    salida = probarSalidaFachada(fachada, OPCION_CONTAR_VENTAS_POR_TIPO, "", 0, 100, error);
+    verificar(salida == "Unidades vendidas: novelas 1, textos comunes 1, escolares 0\n", "precio estrictamente mayor");
+    salida = probarSalidaFachada(fachada, OPCION_CONTAR_VENTAS_POR_TIPO, "", 0, 500, error);
+    verificar(salida == "Unidades vendidas: novelas 0, textos comunes 0, escolares 0\n", "contadores no conservan consultas anteriores");
+    salida = probarSalidaFachada(fachada, OPCION_CONSULTAR_MAS_VENDIDO, "E", 0, 0, error);
+    verificar(error == SIN_ERROR && salida.find("ISBN: 1000000000001\n") != string::npos
+              && salida.find("Autor: 10000010 | Luis | Lopez\n") != string::npos,
+              "maximo por unidades imprime datos completos y autor");
+    salida = probarSalidaFachada(fachada, OPCION_CONSULTAR_LIBRO, "", 1000000000999L, 0, error);
+    verificar(error == LIBRO_NO_EXISTE && salida == "", "consulta fallida no imprime datos anteriores");
+    salida = probarSalidaFachada(fachada, OPCION_CONSULTAR_MAS_VENDIDO, "Ausente", 0, 0, error);
+    verificar(error == SIN_LIBROS_DE_EDITORIAL && salida == "", "maximo fallido no imprime datos anteriores");
     verificar(mensajeError(DATOS_INVALIDOS) == "Los datos ingresados no son validos.", "mensaje de datos invalidos");
-    verificar(mensajeError(LIMITE_VENTAS) == "No se pueden registrar mas ventas para este libro.", "mensaje limite de ventas");
 }
 
 string probarEntradaMenu(string entrada)
 {
-    std::istringstream datos(entrada);
-    std::ostringstream salida;
-    std::streambuf* entradaOriginal = std::cin.rdbuf(datos.rdbuf());
-    std::streambuf* salidaOriginal = std::cout.rdbuf(salida.rdbuf());
-    std::cin.clear();
+    istringstream datos(entrada);
+    ostringstream salida;
+    streambuf* entradaOriginal = cin.rdbuf(datos.rdbuf());
+    streambuf* salidaOriginal = cout.rdbuf(salida.rdbuf());
+    cin.clear();
     ejecutarMenu();
-    std::cin.rdbuf(entradaOriginal);
-    std::cout.rdbuf(salidaOriginal);
-    std::cin.clear();
+    cin.rdbuf(entradaOriginal);
+    cout.rdbuf(salidaOriginal);
+    cin.clear();
     return (salida.str());
 }
 
 void probarMenu()
 {
-    string salida = probarEntradaMenu("6\n5\n999\n7\n999\n4\nAusente\n10\nAusente\n1\n20\nAna Maria\nPerez\n1\n10\nLuis\nLopez\n1\n20\nOtro\nAutor\n2\n1\n1\nEl bosque\nE\n100\ninfantil\n2\n2\n2\nEl texto\nE\n200\nMatematica\n31\n12\n2025\n2\n3\n3\nEscuela\nE\n100\nHistoria\n1\n1\n2026\n2\n2\n1\n1\nDuplicado\nE\n10\naventura\n3\n999\n20\n3\n2\n20\n3\n1\n999\n3\n1\n20\n3\n1\n10\n4\nEl \n5\n1\n5\n2\n5\n3\n6\n7\n1\n7\n2\n7\n3\n7\n1\n8\nE\n9\n99\n10\nE\n0\n");
+    string salida = probarEntradaMenu(
+        "6\n5\n1000000000999\n7\n1000000000999\n4\nAusente\n10\nAusente\n"
+        "1\n10000020\nAna Maria\nPerez\n1\n10000010\nLuis\nLopez\n1\n10000020\nOtro\nAutor\n"
+        "2\n1\n1000000000001\nEl bosque\nE\n100\ninfantil\n"
+        "2\n2\n1000000000002\nEl texto\nE\n200\nMatematica\n31\n12\n2025\n"
+        "2\n3\n1000000000003\nEscuela\nE\n100\nHistoria\n1\n1\n2026\n2\n"
+        "2\n1\n1000000000001\nDuplicado\nE\n10\naventura\n"
+        "3\n1000000000999\n10000020\n3\n1000000000002\n10000020\n"
+        "3\n1000000000001\n10000999\n3\n1000000000001\n10000020\n3\n1000000000001\n10000010\n"
+        "4\nEl \n5\n1000000000001\n5\n1000000000002\n5\n1000000000003\n6\n"
+        "7\n1000000000001\n7\n1000000000002\n7\n1000000000003\n7\n1000000000001\n"
+        "8\nE\n9\n99\n10\nE\n0\n");
     verificar(salida.find("No hay autores registrados.") != string::npos, "salida del menu");
     verificar(salida.find("No existe un libro con ese ISBN.") != string::npos, "salida del menu");
     verificar(salida.find("Ningun titulo comienza con esa frase.") != string::npos, "salida del menu");
@@ -606,9 +629,9 @@ void probarMenu()
     verificar(salida.find("Ya existe un libro con ese ISBN.") != string::npos, "salida del menu");
     verificar(salida.find("El libro indicado no es una novela.") != string::npos, "salida del menu");
     verificar(salida.find("No existe un autor con esa cedula.") != string::npos, "salida del menu");
-    verificar(salida.find("1 | El bosque | Novela") != string::npos, "salida del menu");
-    verificar(salida.find("2 | El texto | Texto") != string::npos, "salida del menu");
-    verificar(salida.find("Autor: 10 | Luis | Lopez") != string::npos, "salida del menu");
+    verificar(salida.find("1000000000001 | El bosque | Novela") != string::npos, "salida del menu");
+    verificar(salida.find("1000000000002 | El texto | Texto") != string::npos, "salida del menu");
+    verificar(salida.find("Autor: 10000010 | Luis | Lopez") != string::npos, "salida del menu");
     verificar(salida.find("Materia: Matematica") != string::npos, "salida del menu");
     verificar(salida.find("Publicacion: 31/12/2025") != string::npos, "salida del menu");
     verificar(salida.find("Anio escolar: 2") != string::npos, "salida del menu");
@@ -618,23 +641,84 @@ void probarMenu()
     verificar(salida.find("Recaudacion: 400") != string::npos, "salida del menu");
     verificar(salida.find("Unidades vendidas: novelas 2, textos comunes 1, escolares 1") != string::npos, "salida del menu");
     verificar(salida.find("Unidades vendidas: 2") != string::npos, "salida del menu");
-    verificar(salida.find("10 | Luis | Lopez") < salida.find("20 | Ana Maria | Perez"), "menu muestra autores ordenados");
-    salida = probarEntradaMenu("abc\n11\n1\n0\n99999999999999999999999999999\n1x\n1\n   \nAna\nPerez\n2\n2\n2\nTexto\nE\n-1\nnan\n10x\n10\nM\n31\n2\n2026\n28\n2\n2026\n5\n2\n0\n");
-    verificar(salida.find("Ingrese un entero") != string::npos, "salida del menu");
-    verificar(salida.find("Ingrese un texto no vacio.") != string::npos, "salida del menu");
-    verificar(salida.find("Ingrese un precio no negativo") != string::npos, "salida del menu");
-    verificar(salida.find("La fecha no existe.") != string::npos, "salida del menu");
-    verificar(salida.find("Publicacion: 28/2/2026") != string::npos, "salida del menu");
-    probarEntradaMenu("9\n1..2\n.50\n9\n 12.25 \n0\n");
-    probarEntradaMenu("");
-    probarEntradaMenu("1\n");
-    probarEntradaMenu("2\n1\n1\nTitulo\n");
-    probarEntradaMenu("2\n3\n1\nT\nE\n1\nM\n1\n1\n2026\n");
+    verificar(salida.find("10000010 | Luis | Lopez") < salida.find("10000020 | Ana Maria | Perez"), "menu muestra autores ordenados");
+    string largo(101, 'A');
+    salida = probarEntradaMenu("abc\n11\n1\n0\n123456789\n1x\n10000001\n\n" + largo + "\nAna\nPerez\n"
+                               "2\n2\n1000000000002\nTexto\nE\n-1\nnan\n10x\n10\nM\n31\n2\n2026\n"
+                               "28\n2\n2026\n5\n1000000000002\n0\n");
+    verificar(salida.find("Ingrese un entero entre 0 y 10") != string::npos, "menu rechaza opcion invalida");
+    verificar(salida.find("Ingrese 8 digitos") != string::npos, "menu exige cedula de ocho digitos");
+    verificar(salida.find("Ingrese un texto de 1 a 100 caracteres") != string::npos, "menu rechaza texto vacio o largo");
+    verificar(salida.find("Ingrese un precio valido") != string::npos, "menu rechaza precio invalido");
+    verificar(salida.find("Fecha inexistente.") != string::npos, "menu vuelve a pedir una fecha inexistente");
+    verificar(salida.find("Publicacion: 28/2/2026") != string::npos, "alta valida despues de los errores");
+    salida = probarEntradaMenu("9\n1..2\n.50\n9\n12.25\n0\n");
+    verificar(salida.find("Ingrese un precio valido") != string::npos, "precio con dos puntos rechazado");
+    verificar(salida.find("Unidades vendidas: novelas 0, textos comunes 0, escolares 0") != string::npos,
+              "precio decimal aceptado");
+}
+
+void probarExtremos()
+{
+    string maximo = "9999999999999";
+    verificar(esEntero(maximo), "entero admite trece digitos");
+    verificar(convertirEntero(maximo) == 9999999999999L, "conversion exacta de trece digitos");
+    verificar(!esEntero(maximo + "0"), "entero rechaza mas de trece digitos antes de convertir");
+    verificar(!esPrecio(".") && !esPrecio("1.2.3") && !esPrecio("nan") && !esPrecio("inf"),
+              "precio rechaza formato sin numero y valores especiales");
+    verificar(esPrecio("0") && esPrecio(".5") && esPrecio("12.25"), "precio admite cero y decimales");
+    verificar(mismoImporte(convertirPrecio("12.25"), 12.25f), "conversion decimal conserva valor");
+    verificar(!textoValido("   ") && !textoValido("\t\r "), "texto rechaza solo blancos");
+    verificar(textoValido(" Ana Maria "), "texto conserva espacios de contenido valido");
+    verificar(textoValido(string(100, 'A')) && !textoValido(string(101, 'A')),
+              "texto controla ambos lados del limite de longitud");
+    const char* incompletas[] = {"", "0", "abc", "1\n", "1\n10000001\nAna\n",
+        "2\n1\n1000000000001\nT\nE\n0\n", "3\n1000000000001\n", "4\n",
+        "5\n", "7\n", "8\n", "9\n", "10\n"};
+    for (unsigned int i = 0; i < sizeof(incompletas) / sizeof(incompletas[0]); i++)
+    {
+        string salida = probarEntradaMenu(incompletas[i]);
+        verificar(salida.find("Operacion realizada.") == string::npos,
+                  "EOF termina sin confirmar una operacion incompleta");
+    }
+    string salida = probarEntradaMenu("9\n" + string(400, '9') + "\n12.25\n0\n");
+    verificar(salida.find("Ingrese un precio valido") != string::npos,
+              "menu rechaza una linea demasiado larga");
+    verificar(salida.find("Unidades vendidas: novelas 0, textos comunes 0, escolares 0") != string::npos,
+              "menu continua despues de una linea demasiado larga");
+    salida = probarEntradaMenu("1\n10000001\n   \nAna\nPerez\n6\n0\n");
+    verificar(salida.find("caracteres con contenido") != string::npos
+              && salida.find("10000001 | Ana | Perez") != string::npos,
+              "menu repregunta nombre sin contenido y registra el corregido");
+    salida = probarEntradaMenu("2\n1\n123456789\n12345678901234\n1000000000001\nT\nE\n10\naventura\n5\n1000000000001\n0\n");
+    verificar(salida.find("Ingrese 13 digitos") != string::npos
+              && salida.find("ISBN: 1000000000001") != string::npos,
+              "menu exige trece digitos de ISBN y conserva la clave completa");
+    salida = probarEntradaMenu("2\n9\n3\n1000000000001\n   \nT\n\t\nE\ninf\n10\n \nM\n31\n4\n2026\n30\n4\n2026\n0\n7\n3\n5\n1000000000001\n0\n");
+    verificar(salida.find("Ingrese un entero entre 1 y 3") != string::npos,
+              "menu rechaza tipo de libro fuera de opciones");
+    verificar(salida.find("Fecha inexistente.") != string::npos
+              && salida.find("Publicacion: 30/4/2026") != string::npos,
+              "menu corrige fecha inexistente sin cancelar el alta");
+    verificar(salida.find("Ingrese un entero entre 1 y 6") != string::npos
+              && salida.find("Anio escolar: 3") != string::npos,
+              "menu rechaza extremos invalidos de anio escolar");
+    verificar(salida.find("Titulo: T") != string::npos && salida.find("Editorial: E") != string::npos
+              && salida.find("Materia: M") != string::npos,
+              "menu corrige blancos en titulo editorial y materia antes de llamar a fachada");
+    salida = probarEntradaMenu("1\n10000001\nAna\n   \nPerez\n6\n0\n");
+    verificar(salida.find("10000001 | Ana | Perez") != string::npos,
+              "menu corrige apellido sin contenido");
+    salida = probarEntradaMenu("2\n1\n1000000000001\nT\nE\n10\n   \naventura\n5\n1000000000001\n0\n");
+    verificar(salida.find("Genero: aventura") != string::npos,
+              "menu corrige genero sin contenido");
+
 }
 
 int main()
 {
     probarMenu();
+    probarExtremos();
     probarFachada();
     probarMensajesError();
     probarObjeto();
@@ -652,10 +736,10 @@ int main()
     int resultado = 0;
     if (fallos != 0)
     {
-        std::cerr << fallos << " comprobacion(es) fallaron\n";
+        cerr << fallos << " comprobacion(es) fallaron\n";
         resultado = 1;
     }
     else
-        std::cout << "Todas las pruebas: OK\n";
+        cout << "Todas las pruebas: OK\n";
     return (resultado);
 }

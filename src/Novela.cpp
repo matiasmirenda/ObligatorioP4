@@ -1,24 +1,41 @@
+#include <iostream>
+#include "ValidacionDatos.h"
+#include "Parametros.h"
 #include "Novela.h"
-#include <cstddef>
 
-Novela::Novela(long int cod, string tit, string ed, double precio, string gen)
-    : Libro(cod, tit, ed, precio), tipo("Novela"), genero(gen)
+using namespace std;
+
+Novela::Novela(long int cod, string tit, string ed, float precio, string gen)
+    : Libro(cod, tit, ed, precio), genero(gen)
 {
     autor = NULL;
 }
 string Novela::getGenero() { return (genero); }
 Autor *Novela::getAutor() { return (autor); }
 void Novela::asignarAutor(Autor *nuevo) { autor = nuevo; }
-bool Novela::datosValidos() { return (Libro::datosValidos() && !(genero == "")); }
-double Novela::calcularPrecioVenta()
+bool Novela::datosValidos() { return (Libro::datosValidos() && textoValido(genero)); }
+float Novela::calcularPrecioVenta()
 {
-    double precio = getPrecioBase();
+    float precio = getPrecioBase();
     if (genero == "infantil")
-        precio = precio * 0.80;
+        precio = precio * FACTOR_PRECIO_INFANTIL;
     return (precio);
 }
-string Novela::getTipo() { return (tipo); }
+TipoLibro Novela::getTipo() { return (NOVELA); }
 
 Novela::~Novela()
 {
+}
+
+void Novela::imprimir()
+{
+    Libro::imprimir();
+    cout << "Genero: " << genero << '\n';
+    if (autor != NULL)
+    {
+        cout << "Autor: ";
+        autor->imprimir();
+    }
+    else
+        cout << "Sin autor asociado.\n";
 }

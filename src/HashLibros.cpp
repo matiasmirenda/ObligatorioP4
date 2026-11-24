@@ -1,5 +1,4 @@
 #include "HashLibros.h"
-#include <cstddef>
 
 HashLibros::HashLibros()
 {
