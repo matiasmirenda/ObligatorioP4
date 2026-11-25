@@ -1,42 +1,42 @@
 #ifndef LIBRO_H
 #define LIBRO_H
-#include "Str.h"
 
-class Libro
+#include <string>
+#include "Objeto.h"
+#include "TipoLibro.h"
+using std::string;
+
+class Libro : public Objeto
 {
 private:
-    long long isbn;
-    String titulo;
-    String editorial;
-    double precioBase;
+    void imprimirTipo();
+    long int isbn;
+    string titulo;
+    string editorial;
+    float precioBase;
     int unidadesVendidas;
+
 public:
-    // Guarda los datos; comprobar datosValidos() antes de insertar.
-    Libro(long long, String, String, double);
-    Libro(const Libro&);
+    Libro(long int, string, string, float);
     virtual ~Libro();
-    long long getIsbn();
-    String getTitulo();
-    String getEditorial();
-    double getPrecioBase();
+    long int getId();
+    string getTitulo();
+    string getEditorial();
+    float getPrecioBase();
     int getUnidadesVendidas();
-    // PRECONDICION:
-    // 1- El nuevo titulo no esta vacio.
-    void setTitulo(String);
-    // PRECONDICION:
-    // 1- La nueva editorial no esta vacia.
-    void setEditorial(String);
-    // PRECONDICION:
-    // 1- El nuevo precio es mayor o igual a cero.
-    void setPrecioBase(double);
-    // PRECONDICION:
-    // 1- Las unidades vendidas son menores que el maximo representable por int.
+
+    virtual void imprimir();
+    void imprimirBasico();
+    void imprimirPrecioVenta();
     void registrarVenta();
-    bool comienzaCon(String);
+    // Indica si el titulo comienza exactamente con la frase, distinguiendo mayusculas.
+    bool comienzaCon(string);
+    // Comprueba ISBN positivo, titulo y editorial con contenido y longitud permitida, y precio no negativo.
     virtual bool datosValidos();
+    // Devuelve el precio de la unidad aplicando los descuentos de su tipo.
     // PRECONDICION:
     // 1- Los datos del libro son validos.
-    virtual double calcularPrecioVenta() = 0;
-    virtual String getTipo() = 0;
+    virtual float calcularPrecioVenta() = 0;
+    virtual TipoLibro getTipo() = 0;
 };
 #endif

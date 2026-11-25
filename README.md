@@ -54,11 +54,9 @@ impone ese costo. Se elige ABB por su implementación más simple. No se agregan
 de libros. Una lista circular o doblemente enlazada no aporta operaciones que
 necesiten estos recorridos finitos.
 
-En el diagrama, las colecciones tienen los atributos `tabla: HashLibros` y `tabla: ABBAutores`.
-Las estructuras se implementan en HashLibros y ABBAutores, separadas de las
-colecciones. Cada una encapsula su struct Nodo: el hash contiene un arreglo fijo de 500
-punteros a listas; el ABB contiene una raíz con hijos izquierdo y derecho.
-El iterador guarda referencias Objeto* en sus propios nodos de LPPF.
+Cada colección implementa directamente su estructura: `ColeccionLibros` contiene
+las cubetas del hash y `ColeccionAutores` la raíz del ABB. Los nodos son tipos
+privados de cada colección, que libera sus nodos y los objetos almacenados.
 
 Las estructuras son propietarias de libros y autores y los eliminan una sola vez
 al finalizar. Novela no elimina al autor compartido y el iterador solo elimina
@@ -85,7 +83,7 @@ mensajes de resultado se muestran desde el módulo MensajesError.
 | Campo | Especificación |
 | --- | --- |
 | **Descripción** | Registrar un nuevo libro, comprobando que no exista otro con el mismo ISBN. Si existe, cancelar el registro e informar un error. Si se registra, inicializar sus unidades vendidas en cero. |
-| **Entrada** | ISBN, título, editorial, precio base y tipo de libro. Para novela: género. Para texto: materia y fecha de publicación. Para escolar: además, año de escuela. |
+| **Entrada** | ISBN de nueve dígitos, título, editorial, precio base y tipo de libro. Para novela: género. Para texto: materia y fecha de publicación. Para escolar: además, año de escuela. |
 | **Salida** | Libro registrado con cero unidades vendidas, o error por ISBN repetido. |
 | **Proceso** | Consultar si el ISBN pertenece al diccionario de libros.<br><strong>Si ya existe entonces</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;Informar error: ya existe un libro con ese ISBN.<br><strong>Sino</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;Crear una Novela, un Texto o un Escolar según el tipo recibido.<br>&nbsp;&nbsp;&nbsp;&nbsp;Inicializar las unidades vendidas en cero.<br>&nbsp;&nbsp;&nbsp;&nbsp;<strong>Si es una novela entonces</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Inicializar su referencia al autor sin asociación.<br>&nbsp;&nbsp;&nbsp;&nbsp;<strong>Fin</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;Insertar el libro en el diccionario de libros.<br>&nbsp;&nbsp;&nbsp;&nbsp;Devolver confirmación de registro.<br><strong>Fin</strong> |
 

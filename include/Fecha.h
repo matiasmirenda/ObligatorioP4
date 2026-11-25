@@ -9,28 +9,18 @@ private:
     int anio;
 
 public:
-    Fecha();
-    // Guarda los componentes; comprobar esValida() antes de comparar.
+    void imprimir();
     Fecha(int, int, int);
-    Fecha(const Fecha&);
-    Fecha operator=(const Fecha&);
-
     int getDia();
     int getMes();
     int getAnio();
 
-    // Valida el calendario y limita el anio a 1900..2099.
+    // Comprueba el calendario y el rango de anios 1900..2099.
     bool esValida();
 
     // PRECONDICION:
-    // 1- Ambas fechas deben ser validas.
+    // 1- Ambas fechas son validas.
     bool operator<(Fecha);
-    // PRECONDICION:
-    // 1- Ambas fechas deben ser validas.
-    bool operator>(Fecha);
-    // PRECONDICION:
-    // 1- Ambas fechas deben ser validas.
-    bool operator==(Fecha);
 };
 
 #endif

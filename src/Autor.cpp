@@ -1,55 +1,34 @@
+#include <iostream>
 #include "Autor.h"
 
-Autor::Autor()
-{
-    cedula = 0;
-}
+using namespace std;
 
-
-Autor::Autor(long ci, String nom, String ape)
+Autor::Autor(long int ci, string nom, string ape)
     : nombre(nom), apellido(ape)
 {
     cedula = ci;
 }
 
-Autor::Autor(const Autor& otro)
-    : nombre(otro.nombre), apellido(otro.apellido)
+long int Autor::getId()
 {
-    cedula = otro.cedula;
+    return (cedula);
 }
 
-long Autor::getCedula() {
-    return cedula;
-}
-
-String Autor::getNombre() {
-    return nombre;
-}
-
-String Autor::getApellido() {
-    return apellido;
-}
-
-void Autor::setNombre(String nuevoNombre) {
-    nombre = nuevoNombre;
-}
-
-void Autor::setApellido(String nuevoApellido) {
-    apellido = nuevoApellido;
-}
-
-bool Autor::datosValidos() {
-    return cedula > 0 && !(nombre == "") && !(apellido == "");
-}
-
-Autor Autor::operator=(const Autor& otro)
+string Autor::getNombre()
 {
-    cedula = otro.cedula;
-    nombre = otro.nombre;
-    apellido = otro.apellido;
-    return *this;
+    return (nombre);
+}
+
+string Autor::getApellido()
+{
+    return (apellido);
 }
 
 Autor::~Autor()
 {
+}
+
+void Autor::imprimir()
+{
+    cout << cedula << " | " << nombre << " | " << apellido << '\n';
 }

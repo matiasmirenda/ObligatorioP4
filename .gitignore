@@ -24,6 +24,8 @@
 /docs/guia-codigo.md
 /docs/guia-pruebas.md
 /docs/guia-build-ci.md
+# Compilacion local
+/scripts/build.sh
 
 # Diagramas editables
 *.excalidraw

@@ -1,36 +1,26 @@
 #ifndef AUTOR_H
 #define AUTOR_H
 
-#include "Str.h"
+#include <string>
+#include "Objeto.h"
 
-class Autor
+using std::string;
+
+class Autor : public Objeto
 {
 private:
-    long cedula;
-    String nombre;
-    String apellido;
+    long int cedula;
+    string nombre;
+    string apellido;
 
 public:
-    // Guarda los datos; comprobar datosValidos() antes de insertar en la coleccion.
-    Autor();
-    Autor(long, String, String);
-    Autor(const Autor &);
+    void imprimir();
+    Autor(long int, string, string);
     ~Autor();
-    Autor operator=(const Autor &);
 
-    long getCedula();
-    String getNombre();
-    String getApellido();
-
-    // PRECONDICION:
-    // 1- El nuevo nombre no esta vacio.
-    void setNombre(String);
-    // PRECONDICION:
-    // 1- El nuevo apellido no esta vacio.
-    void setApellido(String);
-
-    // Consulta si la cedula es positiva y ambos textos no estan vacios.
-    bool datosValidos();
+    long int getId();
+    string getNombre();
+    string getApellido();
 };
 
 #endif

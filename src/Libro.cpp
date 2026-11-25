@@ -1,32 +1,84 @@
+#include <iostream>
+#include "ValidacionDatos.h"
 #include "Libro.h"
-Libro::Libro(long long cod, String tit, String ed, double precio)
+
+using namespace std;
+
+Libro::Libro(long int cod, string tit, string ed, float precio)
     : titulo(tit), editorial(ed)
 {
     isbn = cod;
     precioBase = precio;
     unidadesVendidas = 0;
 }
-Libro::Libro(const Libro& otro) : titulo(otro.titulo), editorial(otro.editorial)
-{
-    isbn = otro.isbn;
-    precioBase = otro.precioBase;
-    unidadesVendidas = otro.unidadesVendidas;
-}
+
 Libro::~Libro() {}
-long long Libro::getIsbn() { return isbn; }
-String Libro::getTitulo() { return titulo; }
-String Libro::getEditorial() { return editorial; }
-double Libro::getPrecioBase() { return precioBase; }
-int Libro::getUnidadesVendidas() { return unidadesVendidas; }
-void Libro::setTitulo(String nuevo) { titulo = nuevo; }
-void Libro::setEditorial(String nueva) { editorial = nueva; }
-void Libro::setPrecioBase(double nuevo) { precioBase = nuevo; }
+long int Libro::getId() { return (isbn); }
+string Libro::getTitulo() { return (titulo); }
+string Libro::getEditorial() { return (editorial); }
+float Libro::getPrecioBase() { return (precioBase); }
+int Libro::getUnidadesVendidas() { return (unidadesVendidas); }
+
 void Libro::registrarVenta() { unidadesVendidas++; }
-bool Libro::comienzaCon(String frase)
+bool Libro::comienzaCon(string frase)
 {
-    return titulo.comienzaCon(frase);
+    bool ok = true;
+    long int largoFrase = frase.size();
+    long int largoTitulo = titulo.size();
+    if (largoFrase > largoTitulo)
+        ok = false;
+    else
+    {
+        long int i = 0;
+        while (i != largoFrase && ok)
+        {
+            if (titulo[i] != frase[i])
+                ok = false;
+            else
+                i++;
+        }
+    }
+
+    return (ok);
 }
 bool Libro::datosValidos()
 {
-    return isbn > 0 && !(titulo == "") && !(editorial == "") && precioBase >= 0;
+    return (isbn > 0 && textoValido(titulo) && textoValido(editorial) && precioBase >= 0);
+}
+
+void Libro::imprimirTipo()
+{
+    switch (getTipo())
+    {
+        case NOVELA:
+            cout << "Novela";
+            break;
+        case TEXTO:
+            cout << "Texto";
+            break;
+        case ESCOLAR:
+            cout << "Escolar";
+            break;
+    }
+}
+
+void Libro::imprimir()
+{
+    cout << "ISBN: " << isbn << "\nTitulo: " << titulo
+              << "\nEditorial: " << editorial << "\nTipo: ";
+    imprimirTipo();
+    cout << "\nPrecio base: " << precioBase
+              << "\nUnidades vendidas: " << unidadesVendidas << '\n';
+}
+
+void Libro::imprimirBasico()
+{
+    cout << isbn << " | " << titulo << " | ";
+    imprimirTipo();
+    cout << '\n';
+}
+
+void Libro::imprimirPrecioVenta()
+{
+    cout << "Importe: " << calcularPrecioVenta() << '\n';
 }

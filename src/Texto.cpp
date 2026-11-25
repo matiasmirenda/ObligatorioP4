@@ -1,25 +1,36 @@
+#include <iostream>
+#include "ValidacionDatos.h"
+#include "Parametros.h"
 #include "Texto.h"
-Texto::Texto(long long cod, String tit, String ed, double precio, String mat, Fecha fecha)
+
+using namespace std;
+
+Texto::Texto(long int cod, string tit, string ed, float precio, string mat, Fecha fecha)
     : Libro(cod, tit, ed, precio), materia(mat), fechaPublicado(fecha) {}
-Texto::Texto(const Texto& otro)
-    : Libro(otro), materia(otro.materia), fechaPublicado(otro.fechaPublicado) {}
-String Texto::getMateria() { return materia; }
-Fecha Texto::getFechaPublicado() { return fechaPublicado; }
-void Texto::setMateria(String nueva) { materia = nueva; }
-void Texto::setFechaPublicado(Fecha nueva) { fechaPublicado = nueva; }
+string Texto::getMateria() { return (materia); }
+Fecha Texto::getFechaPublicado() { return (fechaPublicado); }
 bool Texto::datosValidos()
 {
-    return Libro::datosValidos() && !(materia == "") && fechaPublicado.esValida();
+    return (Libro::datosValidos() && textoValido(materia) && fechaPublicado.esValida());
 }
-double Texto::calcularPrecioVenta()
+float Texto::calcularPrecioVenta()
 {
-    Fecha corte(1, 1, 2026);
+    float precio = getPrecioBase();
+    Fecha corte(DIA_CORTE_DESCUENTO, MES_CORTE_DESCUENTO, ANIO_CORTE_DESCUENTO);
     if (fechaPublicado < corte)
-        return getPrecioBase() * 0.75;
-    return getPrecioBase();
+        precio = precio * FACTOR_PRECIO_TEXTO_ANTIGUO;
+    return (precio);
 }
-String Texto::getTipo() { return "Texto"; }
+TipoLibro Texto::getTipo() { return (TEXTO); }
 
 Texto::~Texto()
 {
+}
+
+void Texto::imprimir()
+{
+    Libro::imprimir();
+    cout << "Materia: " << materia << "\nPublicacion: ";
+    fechaPublicado.imprimir();
+    cout << '\n';
 }

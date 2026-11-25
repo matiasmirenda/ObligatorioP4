@@ -5,16 +5,15 @@ class Escolar : public Texto
 {
 private:
     int anioEscuela;
+
 public:
-    Escolar(long long, String, String, double, String, Fecha, int);
-    Escolar(const Escolar&);
+    void imprimir();
+    Escolar(long int, string, string, float, string, Fecha, int);
     ~Escolar();
     int getAnioEscuela();
-    // PRECONDICION:
-    // 1- El anio escolar esta entre 1 y 6.
-    void setAnioEscuela(int);
     bool datosValidos();
-    double calcularPrecioVenta();
-    String getTipo();
+    // Aplica el descuento de Texto y el adicional de primero a tercero.
+    float calcularPrecioVenta();
+    TipoLibro getTipo();
 };
 #endif

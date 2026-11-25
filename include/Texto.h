@@ -5,22 +5,18 @@
 class Texto : public Libro
 {
 private:
-    String materia;
+    string materia;
     Fecha fechaPublicado;
+
 public:
-    Texto(long long, String, String, double, String, Fecha);
-    Texto(const Texto&);
+    void imprimir();
+    Texto(long int, string, string, float, string, Fecha);
     ~Texto();
-    String getMateria();
+    string getMateria();
     Fecha getFechaPublicado();
-    // PRECONDICION:
-    // 1- La materia no esta vacia.
-    void setMateria(String);
-    // PRECONDICION:
-    // 1- La nueva fecha es valida.
-    void setFechaPublicado(Fecha);
     bool datosValidos();
-    double calcularPrecioVenta();
-    String getTipo();
+    // Aplica el descuento si la publicacion es anterior a la fecha de corte.
+    float calcularPrecioVenta();
+    TipoLibro getTipo();
 };
 #endif
