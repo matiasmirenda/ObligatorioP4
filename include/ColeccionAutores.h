@@ -13,8 +13,8 @@ private:
         Nodo* izquierdo;
         Nodo* derecho;
     };
-    Nodo* raiz;
-    // Libera los nodos del subarbol y sus autores, dejando la raiz en NULL.
+    Nodo* abb;
+    // Libera los nodos del subarbol y sus autores, dejando el arbol vacio.
     void destruirArbol(Nodo*&);
     // Inserta el autor conservando el orden del ABB y adquiere su propiedad.
     // PRECONDICION:

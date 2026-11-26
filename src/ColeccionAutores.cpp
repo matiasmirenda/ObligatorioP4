@@ -1,7 +1,7 @@
 #include "ColeccionAutores.h"
 ColeccionAutores::ColeccionAutores()
 {
-    raiz = NULL;
+    abb = NULL;
 }
 void ColeccionAutores::destruirArbol(Nodo*& nodo)
 {
@@ -14,11 +14,11 @@ void ColeccionAutores::destruirArbol(Nodo*& nodo)
         nodo = NULL;
     }
 }
-ColeccionAutores::~ColeccionAutores() { destruirArbol(raiz); }
-bool ColeccionAutores::estaVacia() { return (raiz == NULL); }
+ColeccionAutores::~ColeccionAutores() { destruirArbol(abb); }
+bool ColeccionAutores::estaVacia() { return (abb == NULL); }
 bool ColeccionAutores::existe(long int cedula)
 {
-    Nodo* actual = raiz;
+    Nodo* actual = abb;
     while (actual != NULL && actual->info->getId() != cedula)
     {
         if (cedula < actual->info->getId())
@@ -30,7 +30,7 @@ bool ColeccionAutores::existe(long int cedula)
 }
 Autor* ColeccionAutores::buscar(long int cedula)
 {
-    Nodo* actual = raiz;
+    Nodo* actual = abb;
     while (actual->info->getId() != cedula)
     {
         if (cedula < actual->info->getId())
@@ -59,7 +59,7 @@ void ColeccionAutores::insertarEnArbol(Nodo*& nodo, Autor* autor)
 }
 void ColeccionAutores::insertar(Autor* autor)
 {
-    insertarEnArbol(raiz, autor);
+    insertarEnArbol(abb, autor);
 }
 void ColeccionAutores::cargarIterador(Nodo* nodo, Iterador& iter)
 {
@@ -72,5 +72,5 @@ void ColeccionAutores::cargarIterador(Nodo* nodo, Iterador& iter)
 }
 void ColeccionAutores::cargarIterador(Iterador& iter)
 {
-    cargarIterador(raiz, iter);
+    cargarIterador(abb, iter);
 }

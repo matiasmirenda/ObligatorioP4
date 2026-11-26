@@ -6,18 +6,18 @@ using namespace std;
 ColeccionLibros::ColeccionLibros()
 {
     for (int i = 0; i < CUBETAS_LIBROS; i++)
-        crearLista(cubetas[i]);
+        crearLista(hash[i]);
 }
 ColeccionLibros::~ColeccionLibros()
 {
     for (int i = 0; i < CUBETAS_LIBROS; i++)
-        destruirLista(cubetas[i]);
+        destruirLista(hash[i]);
 }
 int ColeccionLibros::h(long int isbn) { return (isbn % CUBETAS_LIBROS); }
 bool ColeccionLibros::estaVacia()
 {
     int i = 0;
-    while (i < CUBETAS_LIBROS && cubetas[i] == NULL)
+    while (i < CUBETAS_LIBROS && hash[i] == NULL)
         i++;
     return (i == CUBETAS_LIBROS);
 }
@@ -25,16 +25,16 @@ bool ColeccionLibros::existe(long int isbn)
 {
     bool pertenece = false;
     if (isbn > 0)
-        pertenece = perteneceLista(cubetas[h(isbn)], isbn);
+        pertenece = perteneceLista(hash[h(isbn)], isbn);
     return (pertenece);
 }
 Libro *ColeccionLibros::buscar(long int isbn)
 {
-    return (obtenerEnLista(cubetas[h(isbn)], isbn));
+    return (obtenerEnLista(hash[h(isbn)], isbn));
 }
 void ColeccionLibros::insertar(Libro *libro)
 {
-    insFrontEnLista(cubetas[h(libro->getId())], libro);
+    insFrontEnLista(hash[h(libro->getId())], libro);
 }
 void ColeccionLibros::crearLista(Nodo*& lista)
 {
@@ -73,7 +73,7 @@ void ColeccionLibros::cargarIterador(Iterador& iter)
 {
     for (int i = 0; i < CUBETAS_LIBROS; i++)
     {
-        Nodo *actual = cubetas[i];
+        Nodo *actual = hash[i];
         while (actual != NULL)
         {
             iter.insertar(actual->info);

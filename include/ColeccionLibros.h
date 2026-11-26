@@ -16,7 +16,7 @@ private:
         Libro *info;
         Nodo *siguiente;
     };
-    Nodo* cubetas[CUBETAS_LIBROS];
+    Nodo* hash[CUBETAS_LIBROS];
     // Calcula la cubeta para un ISBN positivo.
     // PRECONDICION:
     // 1- El ISBN es positivo.

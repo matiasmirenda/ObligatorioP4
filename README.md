@@ -54,9 +54,9 @@ impone ese costo. Se elige ABB por su implementación más simple. No se agregan
 de libros. Una lista circular o doblemente enlazada no aporta operaciones que
 necesiten estos recorridos finitos.
 
-Cada colección implementa directamente su estructura: `ColeccionLibros` contiene
-las cubetas del hash y `ColeccionAutores` la raíz del ABB. Los nodos son tipos
-privados de cada colección, que libera sus nodos y los objetos almacenados.
+Cada colección implementa directamente su estructura: `ColeccionLibros` almacena
+las cubetas en `hash` y `ColeccionAutores` conserva la raíz en `abb`. Los nodos
+son tipos privados de cada colección, que libera sus nodos y los objetos almacenados.
 
 Las estructuras son propietarias de libros y autores y los eliminan una sola vez
 al finalizar. Novela no elimina al autor compartido y el iterador solo elimina
