@@ -22,14 +22,14 @@ public:
     void registrarAutor(long int, string, string, TipoError&);
     // Crea el subtipo con cero ventas o informa que el ISBN ya existe.
     // PRECONDICION:
-    // 1- El ISBN tiene trece digitos y los datos del subtipo son validos.
+    // 1- El ISBN tiene nueve digitos y los datos del subtipo son validos.
     // 2- El precio es no negativo y los textos usados cumplen textoValido().
     // 3- El tipo es NOVELA, TEXTO o ESCOLAR; la fecha y el anio escolar son validos si corresponden.
     void registrarLibro(TipoLibro, long int, string, string, float, string, string,
                         int, int, int, int, TipoError&);
     // Controla existencia y tipo novela antes de asociar o reemplazar el autor.
     // PRECONDICION:
-    // 1- El ISBN tiene trece digitos y la cedula ocho.
+    // 1- El ISBN tiene nueve digitos y la cedula ocho.
     void asociarAutor(long int, long int, TipoError&);
     // Lista los datos basicos de las coincidencias exactas o informa SIN_COINCIDENCIAS.
     // PRECONDICION:
@@ -37,13 +37,13 @@ public:
     void listarPorPrefijo(string, TipoError&);
     // Lista los datos completos del libro o informa que el ISBN no existe.
     // PRECONDICION:
-    // 1- El ISBN tiene trece digitos.
+    // 1- El ISBN tiene nueve digitos.
     void consultarLibro(long int, TipoError&);
     // Lista los autores por cedula ascendente o informa SIN_AUTORES.
     void listarAutores(TipoError&);
     // Registra una venta e informa su importe, o devuelve error si el libro no existe.
     // PRECONDICION:
-    // 1- El ISBN tiene trece digitos.
+    // 1- El ISBN tiene nueve digitos.
     void registrarVenta(long int, TipoError&);
     // Calcula y muestra la recaudacion de la editorial.
     // PRECONDICION:

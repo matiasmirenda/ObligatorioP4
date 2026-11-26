@@ -8,7 +8,7 @@ class Fachada;
 void leerLinea(std::string&);
 // Solicita texto con contenido y longitud permitida hasta obtenerlo o finalizar la entrada.
 void leerTexto(std::string, std::string&);
-// Comprueba que la cadena contenga entre uno y trece digitos.
+// Comprueba que la cadena contenga entre uno y nueve digitos.
 bool esEntero(std::string);
 // PRECONDICION:
 // 1- esEntero(linea) devuelve verdadero.

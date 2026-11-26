@@ -34,7 +34,7 @@ const int ANIO_ESCOLAR_MAXIMO = 6;
 const int ULTIMO_ANIO_DESCUENTO_ESCOLAR = 3;
 const int MAX_LARGO_TEXTO = 100;
 const int DIGITOS_CEDULA = 8;
-const int DIGITOS_ISBN = 13;
+const int DIGITOS_ISBN = 9;
 
 const int BASE_DECIMAL = 10;
 const float VALOR_DECIMA = 0.1f;

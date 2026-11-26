@@ -1,13 +1,27 @@
 #ifndef COLECCION_AUTORES_H
 #define COLECCION_AUTORES_H
 
-#include "ABBAutores.h"
+#include "Autor.h"
+#include "Iterador.h"
 
 class ColeccionAutores
 {
 private:
-    ABBAutores tabla;
-
+    struct Nodo
+    {
+        Autor* info;
+        Nodo* izquierdo;
+        Nodo* derecho;
+    };
+    Nodo* abb;
+    // Libera los nodos del subarbol y sus autores, dejando el arbol vacio.
+    void destruirArbol(Nodo*&);
+    // Inserta el autor conservando el orden del ABB y adquiere su propiedad.
+    // PRECONDICION:
+    // 1- El autor es valido y su clave no existe en el arbol.
+    void insertarEnArbol(Nodo*&, Autor*);
+    // Carga referencias a los autores en orden ascendente de cedula.
+    void cargarIterador(Nodo*, Iterador&);
 
 public:
     ColeccionAutores();

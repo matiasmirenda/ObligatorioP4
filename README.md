@@ -2,39 +2,9 @@
 
 ## 1. Diagrama de análisis
 
-Diagrama conceptual provisto por la letra, expresado en Mermaid.
+Diagrama conceptual provisto por la letra.
 
-```mermaid
-classDiagram
-    direction TB
-    class Libro {
-        <<abstract>>
-        isbn
-        titulo
-        editorial
-        precioBase
-        unidadesVendidas
-    }
-    class Novela {
-        genero
-    }
-    class Texto {
-        materia
-        fechaPublicado
-    }
-    class Escolar {
-        anioEscuela
-    }
-    class Autor {
-        cedula
-        nombre
-        apellido
-    }
-    Libro <|-- Novela
-    Libro <|-- Texto
-    Texto <|-- Escolar
-    Novela "0..*" --> "0..1" Autor : escrita por
-```
+![Diagrama de análisis](docs/diagramas/analisis.png)
 
 ## 2. Elección de los TAD
 
@@ -84,11 +54,9 @@ impone ese costo. Se elige ABB por su implementación más simple. No se agregan
 de libros. Una lista circular o doblemente enlazada no aporta operaciones que
 necesiten estos recorridos finitos.
 
-En el diagrama, las colecciones tienen los atributos `tabla: HashLibros` y `tabla: ABBAutores`.
-Las estructuras se implementan en HashLibros y ABBAutores, separadas de las
-colecciones. Cada una encapsula su struct Nodo: el hash contiene un arreglo fijo de 500
-punteros a listas; el ABB contiene una raíz con hijos izquierdo y derecho.
-El iterador guarda referencias Objeto* en sus propios nodos de LPPF.
+Cada colección implementa directamente su estructura: `ColeccionLibros` almacena
+las cubetas en `hash` y `ColeccionAutores` conserva la raíz en `abb`. Los nodos
+son tipos privados de cada colección, que libera sus nodos y los objetos almacenados.
 
 Las estructuras son propietarias de libros y autores y los eliminan una sola vez
 al finalizar. Novela no elimina al autor compartido y el iterador solo elimina
@@ -115,7 +83,7 @@ mensajes de resultado se muestran desde el módulo MensajesError.
 | Campo | Especificación |
 | --- | --- |
 | **Descripción** | Registrar un nuevo libro, comprobando que no exista otro con el mismo ISBN. Si existe, cancelar el registro e informar un error. Si se registra, inicializar sus unidades vendidas en cero. |
-| **Entrada** | ISBN, título, editorial, precio base y tipo de libro. Para novela: género. Para texto: materia y fecha de publicación. Para escolar: además, año de escuela. |
+| **Entrada** | ISBN de nueve dígitos, título, editorial, precio base y tipo de libro. Para novela: género. Para texto: materia y fecha de publicación. Para escolar: además, año de escuela. |
 | **Salida** | Libro registrado con cero unidades vendidas, o error por ISBN repetido. |
 | **Proceso** | Consultar si el ISBN pertenece al diccionario de libros.<br><strong>Si ya existe entonces</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;Informar error: ya existe un libro con ese ISBN.<br><strong>Sino</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;Crear una Novela, un Texto o un Escolar según el tipo recibido.<br>&nbsp;&nbsp;&nbsp;&nbsp;Inicializar las unidades vendidas en cero.<br>&nbsp;&nbsp;&nbsp;&nbsp;<strong>Si es una novela entonces</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Inicializar su referencia al autor sin asociación.<br>&nbsp;&nbsp;&nbsp;&nbsp;<strong>Fin</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;Insertar el libro en el diccionario de libros.<br>&nbsp;&nbsp;&nbsp;&nbsp;Devolver confirmación de registro.<br><strong>Fin</strong> |
 
@@ -201,219 +169,7 @@ mensajes de resultado se muestran desde el módulo MensajesError.
 
 ## 5. Diagrama de implementación
 
-```mermaid
-classDiagram
-    direction LR
-
-    Fachada "1" *-- "1" ColeccionLibros
-    Fachada "1" *-- "1" ColeccionAutores
-    ColeccionLibros "1" *-- "1" HashLibros
-    ColeccionAutores "1" *-- "1" ABBAutores
-    HashLibros "1" *-- "0..*" Libro
-    ABBAutores "1" *-- "0..*" Autor
-    Objeto <|-- Autor
-    Objeto <|-- Libro
-    Libro <|-- Novela
-    Libro <|-- Texto
-    Texto <|-- Escolar
-    Novela "0..*" o-- "0..1" Autor
-    Texto "1" *-- "1" Fecha
-
-    class Objeto {
-        <<abstract>>
-        +~Objeto()
-        +getId()* long int
-    }
-    class Libro {
-        <<abstract>>
-        -imprimirTipo() void
-        -isbn: long int
-        -titulo: string
-        -editorial: string
-        -precioBase: float
-        -unidadesVendidas: int
-        +Libro(long int, string, string, float)
-        +~Libro()
-        +getId() long int
-        +getTitulo() string
-        +getEditorial() string
-        +getPrecioBase() float
-        +getUnidadesVendidas() int
-        +registrarVenta() void
-        +comienzaCon(string) bool
-        +datosValidos() bool
-        +calcularPrecioVenta()* float
-        +getTipo()* TipoLibro
-        +imprimir() void
-        +imprimirBasico() void
-        +imprimirPrecioVenta() void
-    }
-    class Novela {
-        -genero: string
-        -autor: Autor#42;
-        +Novela(long int, string, string, float, string)
-        +~Novela()
-        +getGenero() string
-        +getAutor() Autor #42;
-        +asignarAutor(Autor #42;) void
-        +datosValidos() bool
-        +calcularPrecioVenta() float
-        +getTipo() TipoLibro
-        +imprimir() void
-    }
-    class Texto {
-        -materia: string
-        -fechaPublicado: Fecha
-        +Texto(long int, string, string, float, string, Fecha)
-        +~Texto()
-        +getMateria() string
-        +getFechaPublicado() Fecha
-        +datosValidos() bool
-        +calcularPrecioVenta() float
-        +getTipo() TipoLibro
-        +imprimir() void
-    }
-    class Escolar {
-        -anioEscuela: int
-        +Escolar(long int, string, string, float, string, Fecha, int)
-        +~Escolar()
-        +getAnioEscuela() int
-        +datosValidos() bool
-        +calcularPrecioVenta() float
-        +getTipo() TipoLibro
-        +imprimir() void
-    }
-    class Autor {
-        -cedula: long int
-        -nombre: string
-        -apellido: string
-        +Autor(long int, string, string)
-        +~Autor()
-        +getId() long int
-        +getNombre() string
-        +getApellido() string
-        +imprimir() void
-    }
-    class Fecha {
-        -dia: int
-        -mes: int
-        -anio: int
-        +Fecha(int, int, int)
-        +getDia() int
-        +getMes() int
-        +getAnio() int
-        +esValida() bool
-        +operator<(Fecha) bool
-        +imprimir() void
-    }
-    class ColeccionLibros {
-        <<diccionario>>
-        -tabla: HashLibros
-        +ColeccionLibros()
-        +~ColeccionLibros()
-        +estaVacia() bool
-        +existe(long int) bool
-        +buscar(long int) Libro#42;
-        +insertar(Libro#42;) void
-        +cargarIterador(Iterador&) void
-        +cargarPorPrefijo(string, Iterador&) void
-        +existeEditorial(string) bool
-        +calcularRecaudacion(string) float
-        +contarVentasPorTipo(float, long int&, long int&, long int&) void
-        +masVendido(string) Libro#42;
-        +imprimirRecaudacion(string) void
-        +imprimirVentasPorTipo(float) void
-    }
-    class ColeccionAutores {
-        <<diccionario>>
-        -tabla: ABBAutores
-        +ColeccionAutores()
-        +~ColeccionAutores()
-        +estaVacia() bool
-        +existe(long int) bool
-        +buscar(long int) Autor#42;
-        +insertar(Autor#42;) void
-        +cargarIterador(Iterador&) void
-    }
-    class HashLibros {
-        -cubetas: Nodo#42;[CUBETAS_LIBROS]
-        -h(long int) int
-        -crearLista(Nodo#42;&) void
-        -destruirLista(Nodo#42;&) void
-        -perteneceLista(Nodo#42;, long int) bool
-        -insFrontEnLista(Nodo#42;&, Libro#42;) void
-        -obtenerEnLista(Nodo#42;, long int) Libro#42;
-        +HashLibros()
-        +~HashLibros()
-        +estaVacia() bool
-        +existe(long int) bool
-        +buscar(long int) Libro#42;
-        +insertar(Libro#42;) void
-        +cargarIterador(Iterador&) void
-    }
-    class ABBAutores {
-        -raiz: Nodo#42;
-        -destruirArbol(Nodo#42;&) void
-        -insertarEnArbol(Nodo#42;&, Autor#42;) void
-        -cargarIterador(Nodo#42;, Iterador&) void
-        +ABBAutores()
-        +~ABBAutores()
-        +estaVacia() bool
-        +existe(long int) bool
-        +buscar(long int) Autor#42;
-        +insertar(Autor#42;) void
-        +cargarIterador(Iterador&) void
-    }
-    class Iterador {
-        <<iterator>>
-        -primero: Nodo#42;
-        -ultimo: Nodo#42;
-        -cursor: Nodo#42;
-        +Iterador()
-        +~Iterador()
-        +insertar(Objeto#42;) void
-        +reiniciar() void
-        +hayActual() bool
-        +actual() Objeto#42;
-        +avanzar() void
-    }
-    class TipoLibro {
-        <<enumeration>>
-        NOVELA
-        TEXTO
-        ESCOLAR
-    }
-    class TipoError {
-        <<enumeration>>
-        SIN_ERROR
-        AUTOR_YA_EXISTE
-        LIBRO_YA_EXISTE
-        LIBRO_NO_EXISTE
-        AUTOR_NO_EXISTE
-        LIBRO_NO_ES_NOVELA
-        SIN_COINCIDENCIAS
-        SIN_AUTORES
-        SIN_LIBROS_DE_EDITORIAL
-        DATOS_INVALIDOS
-    }
-    class Fachada {
-        <<fachada>>
-        -autores: ColeccionAutores
-        -libros: ColeccionLibros
-        +Fachada()
-        +~Fachada()
-        +registrarAutor(long int, string, string, TipoError&) void
-        +registrarLibro(TipoLibro, long int, string, string, float, string, string, int, int, int, int, TipoError&) void
-        +asociarAutor(long int, long int, TipoError&) void
-        +listarPorPrefijo(string, TipoError&) void
-        +consultarLibro(long int, TipoError&) void
-        +listarAutores(TipoError&) void
-        +registrarVenta(long int, TipoError&) void
-        +calcularRecaudacion(string) void
-        +contarVentasPorTipo(float) void
-        +consultarMasVendido(string, TipoError&) void
-    }
-```
+![Diagrama de implementación](docs/diagramas/implementacion.png)
 
 
 ## 6. Diagrama de módulos
@@ -426,7 +182,6 @@ que no tienen un .cpp asociado.
 
 ![Diagrama de módulos](docs/diagramas/modulos.png)
 
-[Versión vectorial del diagrama](docs/diagramas/modulos.svg)
 
 Para quitar un include se revisa el archivo donde está declarado: un include
 que está únicamente en un .cpp no se transmite a los demás módulos.

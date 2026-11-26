@@ -5,42 +5,87 @@ using namespace std;
 
 ColeccionLibros::ColeccionLibros()
 {
+    for (int i = 0; i < CUBETAS_LIBROS; i++)
+        crearLista(hash[i]);
 }
-
 ColeccionLibros::~ColeccionLibros()
 {
+    for (int i = 0; i < CUBETAS_LIBROS; i++)
+        destruirLista(hash[i]);
 }
-
+int ColeccionLibros::h(long int isbn) { return (isbn % CUBETAS_LIBROS); }
 bool ColeccionLibros::estaVacia()
 {
-    return (tabla.estaVacia());
+    int i = 0;
+    while (i < CUBETAS_LIBROS && hash[i] == NULL)
+        i++;
+    return (i == CUBETAS_LIBROS);
 }
-
-
 bool ColeccionLibros::existe(long int isbn)
 {
-    return (tabla.existe(isbn));
+    bool pertenece = false;
+    if (isbn > 0)
+        pertenece = perteneceLista(hash[h(isbn)], isbn);
+    return (pertenece);
 }
-
-Libro* ColeccionLibros::buscar(long int isbn)
+Libro *ColeccionLibros::buscar(long int isbn)
 {
-    return (tabla.buscar(isbn));
+    return (obtenerEnLista(hash[h(isbn)], isbn));
 }
-
-void ColeccionLibros::insertar(Libro* libro)
+void ColeccionLibros::insertar(Libro *libro)
 {
-    tabla.insertar(libro);
+    insFrontEnLista(hash[h(libro->getId())], libro);
 }
-
+void ColeccionLibros::crearLista(Nodo*& lista)
+{
+    lista = NULL;
+}
+void ColeccionLibros::destruirLista(Nodo*& lista)
+{
+    while (lista != NULL)
+    {
+        Nodo* siguiente = lista->siguiente;
+        delete lista->info;
+        delete lista;
+        lista = siguiente;
+    }
+}
+bool ColeccionLibros::perteneceLista(Nodo* lista, long int isbn)
+{
+    while (lista != NULL && lista->info->getId() != isbn)
+        lista = lista->siguiente;
+    return (lista != NULL);
+}
+void ColeccionLibros::insFrontEnLista(Nodo*& lista, Libro* libro)
+{
+    Nodo* nuevo = new Nodo;
+    nuevo->info = libro;
+    nuevo->siguiente = lista;
+    lista = nuevo;
+}
+Libro* ColeccionLibros::obtenerEnLista(Nodo* lista, long int isbn)
+{
+    while (lista->info->getId() != isbn)
+        lista = lista->siguiente;
+    return (lista->info);
+}
 void ColeccionLibros::cargarIterador(Iterador& iter)
 {
-    tabla.cargarIterador(iter);
+    for (int i = 0; i < CUBETAS_LIBROS; i++)
+    {
+        Nodo *actual = hash[i];
+        while (actual != NULL)
+        {
+            iter.insertar(actual->info);
+            actual = actual->siguiente;
+        }
+    }
 }
 
 void ColeccionLibros::cargarPorPrefijo(string frase, Iterador& resultado)
 {
     Iterador recorrido;
-    tabla.cargarIterador(recorrido);
+    cargarIterador(recorrido);
     while (recorrido.hayActual())
     {
         Libro* libro = (Libro*) recorrido.actual();
@@ -54,7 +99,7 @@ bool ColeccionLibros::existeEditorial(string editorial)
 {
     bool encontrado = false;
     Iterador recorrido;
-    tabla.cargarIterador(recorrido);
+    cargarIterador(recorrido);
     while (recorrido.hayActual() && !encontrado)
     {
         Libro* libro = (Libro*) recorrido.actual();
@@ -69,7 +114,7 @@ float ColeccionLibros::calcularRecaudacion(string editorial)
 {
     float total = 0;
     Iterador recorrido;
-    tabla.cargarIterador(recorrido);
+    cargarIterador(recorrido);
     while (recorrido.hayActual())
     {
         Libro* libro = (Libro*) recorrido.actual();
@@ -86,7 +131,7 @@ void ColeccionLibros::contarVentasPorTipo(float precio, long int& novelas, long 
     textos = 0;
     escolares = 0;
     Iterador recorrido;
-    tabla.cargarIterador(recorrido);
+    cargarIterador(recorrido);
     while (recorrido.hayActual())
     {
         Libro* libro = (Libro*) recorrido.actual();
@@ -107,7 +152,7 @@ Libro* ColeccionLibros::masVendido(string editorial)
 {
     Libro* mayor = NULL;
     Iterador recorrido;
-    tabla.cargarIterador(recorrido);
+    cargarIterador(recorrido);
     while (recorrido.hayActual())
     {
         Libro* libro = (Libro*) recorrido.actual();

@@ -26,3 +26,6 @@
 /docs/guia-build-ci.md
 # Compilacion local
 /scripts/build.sh
+
+# Diagramas editables
+*.excalidraw

@@ -1,15 +1,36 @@
 #ifndef COLECCION_LIBROS_H
 #define COLECCION_LIBROS_H
 
-#include "HashLibros.h"
+#include "Libro.h"
+#include "Iterador.h"
+
+const int CUBETAS_LIBROS = 500;
 
 using std::string;
 
 class ColeccionLibros
 {
 private:
-    HashLibros tabla;
-
+    struct Nodo
+    {
+        Libro *info;
+        Nodo *siguiente;
+    };
+    Nodo* hash[CUBETAS_LIBROS];
+    // Calcula la cubeta para un ISBN positivo.
+    // PRECONDICION:
+    // 1- El ISBN es positivo.
+    int h(long int);
+    void crearLista(Nodo*&);
+    // Libera todos los nodos y libros de la lista y la deja vacia.
+    void destruirLista(Nodo*&);
+    bool perteneceLista(Nodo*, long int);
+    // Inserta al principio y adquiere la propiedad del libro.
+    void insFrontEnLista(Nodo*&, Libro*);
+    // Devuelve el libro prestado correspondiente al ISBN.
+    // PRECONDICION:
+    // 1- La clave existe en la lista.
+    Libro* obtenerEnLista(Nodo*, long int);
 
 public:
     ColeccionLibros();
